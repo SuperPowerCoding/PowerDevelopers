@@ -31,6 +31,8 @@ using Cognex.VisionPro.ToolGroup;
 using Cognex.VisionPro.PMAlign;
 using Cognex.VisionPro.ImageFile;
 using Cognex.VisionPro.ID;
+using Cognex.VisionPro.Dimensioning;
+
 
 
 
@@ -109,11 +111,13 @@ namespace EfficientApp
             public String end_time;
             public long due_msec;
             public String saveFilePath;
+            public int subItemID;
 
             public int analysis_packet(byte[] buf, int size)
             {
                 if (size < Constants.ReqCmdPckSize)
                 {
+                    MessageBox.Show("size wrong");
                     return (int)PacketReturn.ng;
                 }
 
@@ -122,6 +126,7 @@ namespace EfficientApp
                 this.cmd_type = buf[i++];
                 if (this.cmd_type != (byte)CmdType.CMD_TYPE_REQUEST)
                 {
+                    MessageBox.Show("CMD Wrong");
                     return (int)PacketReturn.ng;
                 }
 
@@ -136,6 +141,7 @@ namespace EfficientApp
                 {
                     if((this.order_size+i) > (size-4))
                     {
+                        MessageBox.Show("order size wrong");
                         return (int)PacketReturn.ng;
                     }
                     
@@ -152,11 +158,13 @@ namespace EfficientApp
                     }
                     else
                     {
+                        MessageBox.Show("order string wrong");
                         return (int)PacketReturn.ng;
                     }
                 }
                 else if (this.item_id != (byte)WorkItems.order)
                 {
+                    MessageBox.Show("must be order item id");
                     return (int)PacketReturn.ng;
                 }
 
@@ -217,6 +225,7 @@ namespace EfficientApp
         String refDirectory = Application.StartupPath;
         String verificationDirectory = Application.StartupPath + @"\images\verification\";
         String backupDirectory = Application.StartupPath + @"\images\backup\";
+        String orginalDirectory = Application.StartupPath + @"\images\org\";
         String verificationFile = "verification.jpg";
         String vppFilePath = Application.StartupPath + @"\K595NP.vpp";
         String logBackupPath = Application.StartupPath + @"\LOG";
@@ -347,7 +356,7 @@ namespace EfficientApp
 
         private void InitializeDataBase()
         {
-            string MyConString = "Server=10.1.31.105; Port=3308; Database=k595np; Uid=root; Password=root; SslMode=none; charset=utf8";
+            string MyConString = "Server=127.0.0.1; Port=3306; Database=k595np; Uid=root; Password=root; SslMode=none; charset=utf8";
             mySqlConn = new MySqlConnection(MyConString);
             mySqlConn.Open();
 
@@ -411,9 +420,13 @@ namespace EfficientApp
             cogRecordDisplay1.Record = tmpRecord;
             cogRecordDisplay1.Fit(true);
             * */
+
             tmpRecord = topRecord.SubRecords["ShowLastRunRecordForUserQueue"];
             tmpRecord = tmpRecord.SubRecords["LastRun"];
-            tmpRecord = tmpRecord.SubRecords["CogImageConvertTool1.OutputImage"];
+            tmpRecord = tmpRecord.SubRecords[tmpRecord.SubRecords.Count - 1];
+            
+            //tmpRecord = tmpRecord.SubRecords["CogImageConvertTool1.OutputImage"];
+            
             cogRecordDisplay1.Record = tmpRecord;      
             cogRecordDisplay1.Fit(true);
 
@@ -879,13 +892,13 @@ namespace EfficientApp
             }
         }
 
-        public void backupImages(ref ReqCmd reqCmd, string serial_num, byte result)
+        public void backupImages(ref ReqCmd reqCmd, string product_str, string serial_num, byte result)
         {
             string saveFilePath = backupDirectory + reqCmd.cur_date + "\\";
             string saveFileName = string.Format("item{0}.jpg", reqCmd.item_id);
             //DateTime now = DateTime.Now;
 
-            if (serial_num != null) saveFilePath = saveFilePath + serial_num + "\\";
+            if (serial_num != null && product_str != null) saveFilePath = saveFilePath + product_str + "\\" + serial_num + "\\";
 
             DirectoryInfo di = new DirectoryInfo(saveFilePath);
             if (di.Exists == false)
@@ -894,7 +907,7 @@ namespace EfficientApp
             }
 
             String strFileTmp;
-            if (result == (byte)CmdType.CMD_TYPE_ACK && serial_num != null)
+            if (result == (byte)CmdType.CMD_TYPE_ACK && serial_num != null && product_str != null)
             {                
                 strFileTmp = saveFilePath + saveFileName; 
                 FileInfo fi = new FileInfo(strFileTmp);
@@ -990,7 +1003,7 @@ namespace EfficientApp
                         {
                             respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
                         }
-                        backupImages(ref reqCmd, orderCont.SerialNum, respAck.cmd_type);
+                        backupImages(ref reqCmd, orderCont.first_class+orderCont.second_class, orderCont.SerialNum, respAck.cmd_type);
                         //if(orderCont.SerialNum != null) saveFilePath = saveFilePath + orderCont.SerialNum + "\\";
                     }
                     else
@@ -1009,7 +1022,7 @@ namespace EfficientApp
                             respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                             print_log((byte)LogType.info, string.Format("reqCmd.serial_str"));
                         }
-                        backupImages(ref reqCmd, reqCmd.serial_str, respAck.cmd_type);
+                        backupImages(ref reqCmd, reqCmd.product_str, reqCmd.serial_str, respAck.cmd_type);
                         //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
                     }                   
                 }
@@ -1017,7 +1030,7 @@ namespace EfficientApp
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                     print_log((byte)LogType.info, string.Format("myIDTool.Results.Count : {0}", myIDTool.Results.Count));
-                    backupImages(ref reqCmd, null, respAck.cmd_type);
+                    backupImages(ref reqCmd, null, null, respAck.cmd_type);
                 }
 
                 while(myJob.State != CogJobStateConstants.Stopped)
@@ -1042,9 +1055,32 @@ namespace EfficientApp
         public RespAck CogActExist(ref ReqCmd reqCmd)
         {
             RespAck respAck = new RespAck();
+            int subItem = 0;
 
             try
-            {                
+            {
+                subItem = CheckSubItemID(reqCmd);
+                if(subItem == 0)
+                {
+                    print_log((byte)LogType.err, "CheckSubItemID NG");
+
+                    reqCmd.subItemID = 0;
+
+                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                    respAck.action_type = reqCmd.action_type;
+                    respAck.item_id = reqCmd.item_id;
+                    respAck.cell_number = reqCmd.cell_number;
+                    respAck.process_number = reqCmd.process_number;
+
+                    return respAck;
+                }
+                else
+                {
+                    reqCmd.subItemID = subItem;
+                }
+
+                myJob = myJobManager.Job(string.Format("SubItem{0}", subItem));
+
                 CogToolGroup myTG = myJob.VisionTool as CogToolGroup;
                 CogImageFileTool myIFTool = myTG.Tools["CogImageFileTool1"] as CogImageFileTool;
 
@@ -1065,11 +1101,23 @@ namespace EfficientApp
                     Thread.Sleep(1);
                 }
 
-
-                CogPMAlignTool myPMAlignTool = myTG.Tools["CogPMAlignTool1"] as CogPMAlignTool;
-                if (myPMAlignTool.Results.Count > 0)
+                CogPMAlignResults myPMAlignResults;
+                if(subItem == 2014)
                 {
-                    byte resultScore = (byte)(myPMAlignTool.Results[0].Score*100);
+                    CogPMAlignMultiTool myPMAlignMultiTool = myTG.Tools["CogPMAlignMultiTool1"] as CogPMAlignMultiTool;
+                    myPMAlignResults = myPMAlignMultiTool.Results.PMAlignResults;
+
+                }
+                else
+                {
+                CogPMAlignTool myPMAlignTool = myTG.Tools["CogPMAlignTool1"] as CogPMAlignTool;
+                    myPMAlignResults = myPMAlignTool.Results;
+
+                }
+                
+                if (myPMAlignResults.Count > 0)
+                {
+                    byte resultScore = (byte)(myPMAlignResults[0].Score*100);
 
                     print_log((byte)LogType.info, string.Format("myPMAlignTool.Results[0].Score : {0}", resultScore));
                     //MessageBox.Show(resultId);
@@ -1080,14 +1128,123 @@ namespace EfficientApp
                     respAck.cell_number = reqCmd.cell_number;
                     respAck.process_number = reqCmd.process_number;
                     respAck.matching_rate = resultScore;
-                    respAck.coordinates_x = (int)myPMAlignTool.Results[0].GetPose().TranslationX;
-                    respAck.coordinates_y = (int)myPMAlignTool.Results[0].GetPose().TranslationY;
+                    respAck.coordinates_x = (int)myPMAlignResults[0].GetPose().TranslationX;
+                    respAck.coordinates_y = (int)myPMAlignResults[0].GetPose().TranslationY;
 
                     respAck.data_size = 0;
 
                     if (resultScore >= reqCmd.accracy)
                     {
+                        switch(subItem)
+                        {
+                            case 2009:
+                            case 2010:
+                            case 2011:
+                                {
+                                    CogPMAlignMultiTool myPMAlignMultiTool = myTG.Tools["CogPMAlignMultiTool1"] as CogPMAlignMultiTool;
+
+                                    switch (subItem)
+                                    {
+                                        case 2009:
+                                            if (myPMAlignMultiTool.Results.PMAlignResults.Count == 2)
+                                            {
+                                                string str1 = myPMAlignMultiTool.Results.PMAlignResults[0].ModelName;
+                                                string str2 = myPMAlignMultiTool.Results.PMAlignResults[1].ModelName;                                                
+                                                if ( (str1.Equals("Pattern1") == true || str2.Equals("Pattern1") == true) && (str1.Equals("Pattern2") == true || str2.Equals("Pattern2") == true) )
+                                                {
+                                                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                                }
+                                                else
+                                                {
+                                                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                            }
+                                            break;
+
+                                        case 2010:
+                                            if (myPMAlignMultiTool.Results.PMAlignResults.Count == 1)
+                                            {
+                                                if (myPMAlignMultiTool.Results.PMAlignResults[0].ModelName.Equals("Pattern1") == true)
+                                                {
+                                                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                                }
+                                                else
+                                                {
+                                                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                            }
+                                            break;
+
+                                        case 2011:
+                                            if (myPMAlignMultiTool.Results.PMAlignResults.Count == 0)
+                                            {
+                                                respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                            }
+                                            else
+                                            {
+                                                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                            }
+                                            break;
+
+                                        default:
                         respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                            break;
+                                    }
+                                }
+                                break;
+
+                            case 2017:
+                                {
+                                    CogDistancePointLineTool myDistancePointLineTool = myTG.Tools["CogDistancePointLineTool1"] as CogDistancePointLineTool;
+                                    if(myDistancePointLineTool.Distance < 105)
+                                    {
+                                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                    }
+                                    else
+                                    {
+                                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                    }
+                                }
+                                break;
+
+                            case 2019:
+                            case 2020:
+                            case 2021:
+                            case 2022:
+                            case 2023:                            
+                                {
+                                    CogPMAlignTool myPMAlignTool2 = myTG.Tools["CogPMAlignTool2"] as CogPMAlignTool;
+                                    if(myPMAlignTool2.Results.Count > 0)
+                                    {
+                                        byte resultScore2 = (byte)(myPMAlignTool2.Results[0].Score * 100);
+                                        if(resultScore2 >= reqCmd.accracy)
+                                        {
+                                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                        }
+                                        else
+                                        {
+                                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                    }
+                                }
+                                break;
+
+                            default:
+                                respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                break;
+                        }                       
                     }
                     else
                     {
@@ -1099,15 +1256,15 @@ namespace EfficientApp
                         respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                         print_log((byte)LogType.info, string.Format("reqCmd.serial_str"));
                     }
-                    backupImages(ref reqCmd, reqCmd.serial_str, respAck.cmd_type);
+                    backupImages(ref reqCmd, reqCmd.product_str, reqCmd.serial_str, respAck.cmd_type);
                     //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
                     
                 }
                 else
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
-                    print_log((byte)LogType.info, string.Format("myPMAlignTool.Results.Count : {0}", myPMAlignTool.Results.Count));
-                    backupImages(ref reqCmd, null, respAck.cmd_type);
+                    print_log((byte)LogType.info, string.Format("myPMAlignTool.Results.Count : {0}", myPMAlignResults.Count));
+                    backupImages(ref reqCmd, null, null, respAck.cmd_type);
                 }
 
                 while (myJob.State != CogJobStateConstants.Stopped)
@@ -1319,12 +1476,12 @@ namespace EfficientApp
                     {
                         OrderContents orderCont = new OrderContents();
                         orderCont.analysis(resultId);
-                        backupImages(ref reqCmd, orderCont.SerialNum, 0);
+                        backupImages(ref reqCmd, orderCont.first_class + orderCont.second_class, orderCont.SerialNum, 0);
                         //if(orderCont.SerialNum != null) saveFilePath = saveFilePath + orderCont.SerialNum + "\\";
                     }
                     else
                     {
-                        backupImages(ref reqCmd, reqCmd.serial_str, 0);
+                        backupImages(ref reqCmd, reqCmd.product_str, reqCmd.serial_str, 0);
                         //if (reqCmd.serial_str != null) saveFilePath = saveFilePath + reqCmd.serial_str + "\\";
                     }
                 }
@@ -1332,7 +1489,7 @@ namespace EfficientApp
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                     print_log((byte)LogType.info, string.Format("myIDTool.Results.Count : {0}", myIDTool.Results.Count));
-                    backupImages(ref reqCmd, null, 0);
+                    backupImages(ref reqCmd, null, null, 0);
                 }
 
                 while (myJob.State != CogJobStateConstants.Stopped)
@@ -1449,7 +1606,7 @@ namespace EfficientApp
                                                     break;
 
                                                 case (byte)ActionType.exist:
-                                                    myJob = myJobManager.Job(string.Format("Item{0}", reqCmd.item_id));
+                                                    //myJob = myJobManager.Job(string.Format("Item{0}", reqCmd.item_id));
                                                     respAck = CogActExist(ref reqCmd);
                                                     break;
 
@@ -1458,6 +1615,11 @@ namespace EfficientApp
                                                     break;
 
                                                 default:
+                                                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                                    respAck.action_type = reqCmd.action_type;
+                                                    respAck.item_id = reqCmd.item_id;
+                                                    respAck.cell_number = reqCmd.cell_number;
+                                                    respAck.process_number = reqCmd.process_number;
                                                     break;
                                             }
                                             break;
@@ -1465,6 +1627,23 @@ namespace EfficientApp
                                     default:
 
                                         break;
+                                }
+
+                                FileInfo fi = new FileInfo(verificationDirectory + verificationFile);
+                                if (fi.Exists && reqCmd.subItemID != 0)
+                                {
+                                    string tmpPath = orginalDirectory + string.Format("SubItem{0}\\", reqCmd.subItemID);
+                                    string tmpFilename = reqCmd.cur_date + "_" + reqCmd.start_time + ".jpg";
+
+                                    DirectoryInfo di = new DirectoryInfo(tmpPath);
+                                    if (di.Exists == false)
+                                    {
+                                        di.Create();
+                                    }
+
+                                    //fi.CopyTo(saveFilePath + "old\\" + saveFileName, true);
+                                    fi.MoveTo(tmpPath + tmpFilename);
+                                    //fi.Delete();
                                 }
                             }
                        
@@ -1676,6 +1855,29 @@ namespace EfficientApp
             return rtn;
         }
 
+        public int CheckSubItemID(ReqCmd reqCmd)
+        {
+            int subItem = 0;
+
+            string sql = "SELECT " + reqCmd.product_str + " FROM producttable WHERE WorkItemID=" + string.Format("{0}", reqCmd.item_id);
+            MySqlCommand cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            MySqlDataReader reader = cmd.ExecuteReader();
+            if (reader.HasRows)
+            {
+                reader.Read();
+                if(reader.IsDBNull(0) != true)
+                {
+                    subItem = reader.GetInt32(0);                
+                }
+            }
+            reader.Close();
+
+            return subItem;
+        }
+
         private void UpdateGUI(string s)
         {
             if (OutputTextBox.InvokeRequired)
@@ -1815,7 +2017,7 @@ namespace EfficientApp
         {
             int count = 0;
             MySqlConnection mySqlConn;
-            string MyConString = "Server=10.1.31.105; Port=3308; Database=k595np; Uid=root; Password=root; SslMode=none; charset=utf8";
+            string MyConString = "Server=127.0.0.1; Port=3306; Database=k595np; Uid=root; Password=root; SslMode=none; charset=utf8";
             mySqlConn = new MySqlConnection(MyConString);
             mySqlConn.Open();            
             

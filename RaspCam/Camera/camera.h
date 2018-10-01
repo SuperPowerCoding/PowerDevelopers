@@ -31,6 +31,7 @@ public:
 
     void enableStreaming(bool enable);
 
+	uchar * Mat2RawData(Mat image, int * size);
 
 
 private:

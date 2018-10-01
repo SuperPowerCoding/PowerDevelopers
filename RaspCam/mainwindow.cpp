@@ -158,10 +158,15 @@ void MainWindow::getRawImg()
 {
     int size;
 	uchar * data;
-
-    data = this->camTh->getCapturedRawImg(&size);
-	this->preCapturedMatImg.release();  // free img data
-    this->preCapturedMatImg = this->camTh->getCapturedImg();
+	
+	Mat img = this->camTh->getCapturedImg().clone();
+	
+	this->preCapturedMatImg.release();
+	this->preCapturedMatImg = img;
+	
+	data = this->camTh->Mat2RawData(this->preCapturedMatImg, &size);
+    //data = this->camTh->getCapturedRawImg(&size);
+	//this->preCapturedMatImg = this->camTh->getCapturedImg();
 	
 	qDebug() << "[ui->net]index : " << this->curIdx << "," << res->getImgIdx(this->curIdx);
 	
@@ -172,8 +177,8 @@ void MainWindow::getRawImg()
 }
 
 void MainWindow::streamImg()
-{
-    Mat img = this->camTh->getCapturedImg();
+{    
+	Mat img = this->camTh->getCapturedImg();
 
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT), 0, 0, CV_INTER_LINEAR);
     cv::cvtColor(img, img, CV_BGR2RGB);
@@ -295,7 +300,7 @@ void MainWindow::on_rightButton_clicked()
 void MainWindow::drawImg(bool draw, int x, int y, bool result)
 {
     cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();
-    // cv::cvtColor(img, img, CV_BGR2RGB);  // already converted at streaming
+    // cv::cvtColor(img, img, CV_BGR2RGB);
 
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7), 0, 0, CV_INTER_LINEAR);
     ui->preCapturedImg->resize(img.cols, img.rows);

@@ -178,7 +178,7 @@ void MainWindow::getRawImg()
 
 void MainWindow::streamImg()
 {    
-	Mat img = this->camTh->getCapturedImg();
+    Mat img = this->camTh->getCapturedImg();//clone();
 
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH, D_CAMERA_DISPLAYED_HEIGHT), 0, 0, CV_INTER_LINEAR);
     cv::cvtColor(img, img, CV_BGR2RGB);
@@ -203,7 +203,7 @@ void MainWindow::updateIPResult()
 	// show result data
     qDebug() << "result";
     waitForResponse = false;
-    this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.result);
+    this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.matchRate,this->netTh->ipResult.result);
 }
 
 
@@ -221,7 +221,7 @@ void MainWindow::on_streamingImg_clicked()
     {
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
-        this->drawImg(false,0,0,true);
+        this->drawImg(false,0,0,0,true);
         waitForResponse = true;
     }
 
@@ -279,6 +279,8 @@ void MainWindow::on_leftButton_clicked()
     {
         viewIdx = 0;
     }
+    //this->curIdx = viewIdx;
+    updateCurIdx(viewIdx);
     updateLowerUI(viewIdx);
 }
 
@@ -293,18 +295,19 @@ void MainWindow::on_rightButton_clicked()
         if(viewIdx < 0 ) viewIdx = 0;
     }
 
+    //this->curIdx = viewIdx;
+    updateCurIdx(viewIdx);
     updateLowerUI(viewIdx);
 }
 
 
-void MainWindow::drawImg(bool draw, int x, int y, bool result)
+void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result)
 {
-    cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();
-    // cv::cvtColor(img, img, CV_BGR2RGB);
+    cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();    
 
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7), 0, 0, CV_INTER_LINEAR);
     ui->preCapturedImg->resize(img.cols, img.rows);
-
+    cv::cvtColor(img, img, CV_BGR2RGB);
     if(draw == true)
     {
         if(result == true)
@@ -318,20 +321,7 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
                 res->setImg(this->curIdx,img);
 			}
 
-            this->curIdx++;			
-            QString s = "";
-            if(this->curIdx >= this->res->getSize())
-            {
-                s.append("finished");
-                this->curIdx = this->res->getSize();
-            }
-            else
-            {
-                s.append("STEP ");
-                s.append(QString::number(this->curIdx+1));
-            }
-
-            ui->curStep->setText(s);
+            updateCurIdx(curIdx + 1);
 			
 			if(this->curIdx % D_UI_NUMBER_OF_LOWER_UI_IMGS == 0)
 			{
@@ -341,14 +331,19 @@ void MainWindow::drawImg(bool draw, int x, int y, bool result)
 			{
 				updateLowerUI(-1);
 			}
-            
-
         }
         else
         {
             this->buzzerTh->playWrongMelody();
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(255,0,0), 10);
         }
+
+        QString rate = "";
+        if(matchRate < 0) matchRate = 0;
+        if(matchRate > 100) matchRate = 100;
+        rate = QString::number(matchRate);
+        rate.append("%");
+        this->ui->matchRateResult->setText(rate);
     }
 
     ui->preCapturedImg->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
@@ -373,7 +368,8 @@ void MainWindow::updateLowerUI(int indexStart)
     for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
     {
         img = res->getImgAndIdx(i + indexStart, &idx);
-        index[i] = idx;
+        //index[i] = idx;
+        index[i] = this->viewIdx + i;
         // qDebug() << "updateLowerUI:" << index[i];
 
         // cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*3/7, D_CAMERA_DISPLAYED_HEIGHT*3/7), 0, 0, CV_INTER_LINEAR);
@@ -528,23 +524,54 @@ void MainWindow::on_portcb_currentIndexChanged(const QString &arg1)
 /*
  *      lower img click event
  */
+void MainWindow::updateCurIdx(int idx)
+{
+    this->curIdx = idx;
+    this->viewIdx = this->curIdx;
+
+    QString s = "";
+
+    if(this->curIdx >= this->res->getSize())
+    {
+        this->on_ResetButton_clicked();
+        if(this->res->getSize() == 0)
+        {
+            s.append("Barcode");
+        }
+        else
+        {
+            s.append("OK");
+        }
+
+        this->curIdx = this->res->getSize();
+    }
+    else
+    {
+        s.append("STEP ");
+        s.append(QString::number(this->curIdx+1));
+    }
+
+    // QString s = "STEP ";
+    // s.append(QString::number(this->curIdx+1));
+    ui->curStep->setText(s);
+}
 
 void MainWindow::imgClickEvent(int idx)
 {
-    if( index[idx] > 0 )
+    //if( index[idx] > 0 )
     {
         // this->curIdx = index[idx];		
-        int newindex = this->res->getIndexOf(index[idx]);
+        //int newindex = this->res->getIndexOf(index[idx]);
+        int newindex = viewIdx + idx;
         qDebug() << idx << ":" << newindex;
 
         if(newindex != -1)
         {
-            this->curIdx = newindex;
-            this->viewIdx = this->curIdx;
-            QString s = "STEP ";
-            s.append(QString::number(this->curIdx+1));
-            ui->curStep->setText(s);
-            updateLowerUI(this->curIdx);
+            this->updateCurIdx(newindex);
+            int view = this->curIdx - this->curIdx % 5;
+
+            // this->curIdx -= this->curIdx % 5;
+            updateLowerUI(view);
         }
     }
 }

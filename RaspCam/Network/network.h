@@ -27,12 +27,13 @@ public:
 	{
 		int x;
 		int y;
+        int matchRate;
 		bool result;
 	}ipResult;    
 
     static Network *getInstance() { return &net_instance; }
 
-    void setIpResults(int x, int y, bool res);
+    void setIpResults(int x, int y,int rate, bool res);
 
     // user setting
     // ip address
@@ -71,7 +72,7 @@ private:
     char process[3];
     char cellInfo[20];
     int port = 8080;
-    int imgMatchRate = 60;
+    int imgMatchRate = 75;
     QMutex settingMutex;
 
 

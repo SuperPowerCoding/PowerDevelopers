@@ -208,7 +208,7 @@ int receiveFunc(char *data)
                 setProcSequence();
 			}
 			/* do something * */            
-            netHander->setIpResults(200, 300, 1);
+            netHander->setIpResults(200, 300,info->matching_rate, 1);
 
             deleteJob(currentJobData);
 		}
@@ -216,7 +216,7 @@ int receiveFunc(char *data)
 	else if(info->cmd_type == CMD_TYPE_NACK)
 	{
 		cout <<"received Error from server." <<endl;
-        netHander->setIpResults(200, 300, 0);
+        netHander->setIpResults(200, 300,info->matching_rate, 0);
 
         deleteJob(currentJobData);
 	}

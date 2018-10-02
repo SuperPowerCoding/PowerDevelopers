@@ -83,7 +83,9 @@ private:
     Buzzer * buzzerTh= NULL;
     Key * keyTh = NULL;
 
-    void drawImg(bool draw, int x, int y, bool result);
+    void updateCurIdx(int idx);
+
+    void drawImg(bool draw, int x, int y,int matchRate, bool result);
 
     void updateLowerUI(int startIdx);
 

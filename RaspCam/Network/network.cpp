@@ -89,12 +89,13 @@ void Network::sendRawImgData()
    requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx); //index will be switched by step .
 }
 
-void Network::setIpResults(int x, int y, bool res)
+void Network::setIpResults(int x, int y,int rate, bool res)
 {
 
     printf("network::setIpResults\n");
     this->ipResult.x = x;
     this->ipResult.y = y;
+    this->ipResult.matchRate = rate;
     this->ipResult.result = res;  
 }
 

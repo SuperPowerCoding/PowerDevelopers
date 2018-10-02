@@ -64,6 +64,8 @@ public:
     QPushButton *img4;
     QWidget *horizontalLayoutWidget_2;
     QHBoxLayout *horizontalLayout_2;
+    QVBoxLayout *verticalLayout_2;
+    QLabel *matchRateResult;
     QPushButton *ResetButton;
     QLabel *curStep;
     QPushButton *leftButton;
@@ -289,26 +291,41 @@ public:
 
         horizontalLayoutWidget_2 = new QWidget(CameraTab);
         horizontalLayoutWidget_2->setObjectName(QStringLiteral("horizontalLayoutWidget_2"));
-        horizontalLayoutWidget_2->setGeometry(QRect(310, 130, 171, 80));
+        horizontalLayoutWidget_2->setGeometry(QRect(310, 130, 171, 71));
         horizontalLayout_2 = new QHBoxLayout(horizontalLayoutWidget_2);
         horizontalLayout_2->setSpacing(6);
         horizontalLayout_2->setContentsMargins(11, 11, 11, 11);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
         horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        matchRateResult = new QLabel(horizontalLayoutWidget_2);
+        matchRateResult->setObjectName(QStringLiteral("matchRateResult"));
+        QFont font2;
+        font2.setPointSize(12);
+        matchRateResult->setFont(font2);
+        matchRateResult->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_2->addWidget(matchRateResult);
+
         ResetButton = new QPushButton(horizontalLayoutWidget_2);
         ResetButton->setObjectName(QStringLiteral("ResetButton"));
         sizePolicy.setHeightForWidth(ResetButton->sizePolicy().hasHeightForWidth());
         ResetButton->setSizePolicy(sizePolicy);
 
-        horizontalLayout_2->addWidget(ResetButton);
+        verticalLayout_2->addWidget(ResetButton);
+
+
+        horizontalLayout_2->addLayout(verticalLayout_2);
 
         curStep = new QLabel(horizontalLayoutWidget_2);
         curStep->setObjectName(QStringLiteral("curStep"));
-        QFont font2;
-        font2.setFamily(QStringLiteral("Piboto"));
-        font2.setPointSize(12);
-        font2.setItalic(false);
-        curStep->setFont(font2);
+        QFont font3;
+        font3.setFamily(QStringLiteral("Piboto"));
+        font3.setPointSize(12);
+        font3.setItalic(false);
+        curStep->setFont(font3);
         curStep->setTextFormat(Qt::AutoText);
         curStep->setAlignment(Qt::AlignCenter);
 
@@ -333,7 +350,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -347,7 +364,7 @@ public:
         label_4->setText(QApplication::translate("MainWindow", "Port", Q_NULLPTR));
         groupBox_2->setTitle(QApplication::translate("MainWindow", "Image Process Settings", Q_NULLPTR));
         label_5->setText(QApplication::translate("MainWindow", "Match Rate", Q_NULLPTR));
-        currentRate->setText(QApplication::translate("MainWindow", "65%", Q_NULLPTR));
+        currentRate->setText(QApplication::translate("MainWindow", "75%", Q_NULLPTR));
         groupBox_3->setTitle(QApplication::translate("MainWindow", "Factory", Q_NULLPTR));
         exitButton->setText(QApplication::translate("MainWindow", "Exit", Q_NULLPTR));
         label->setText(QApplication::translate("MainWindow", "Cell Info", Q_NULLPTR));
@@ -359,6 +376,7 @@ public:
         img2->setText(QString());
         img3->setText(QString());
         img4->setText(QString());
+        matchRateResult->setText(QString());
         ResetButton->setText(QApplication::translate("MainWindow", "RESET", Q_NULLPTR));
         curStep->setText(QApplication::translate("MainWindow", "Barcode", Q_NULLPTR));
         leftButton->setText(QApplication::translate("MainWindow", "\342\227\200", Q_NULLPTR));

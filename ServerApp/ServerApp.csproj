@@ -116,6 +116,7 @@
     <Reference Include="Cognex.VisionPro">
       <Name>Cognex.VisionPro</Name>
     </Reference>
+    <Reference Include="Cognex.VisionPro.Blob, Version=63.0.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64" />
     <Reference Include="Cognex.VisionPro.Controls">
       <Name>Cognex.VisionPro.Controls</Name>
     </Reference>
@@ -132,6 +133,7 @@
     <Reference Include="Cognex.VisionPro.QuickBuild.Core">
       <Name>Cognex.VisionPro.QuickBuild.Core</Name>
     </Reference>
+    <Reference Include="Cognex.VisionPro.SearchMax, Version=63.0.0.0, Culture=neutral, PublicKeyToken=ef0f902af9dee505, processorArchitecture=AMD64" />
     <Reference Include="Cognex.VisionPro.ToolGroup">
       <Name>Cognex.VisionPro.ToolGroup</Name>
     </Reference>

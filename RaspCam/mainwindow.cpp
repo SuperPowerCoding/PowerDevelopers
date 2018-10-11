@@ -83,9 +83,9 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->factorycb->addItem(s);
     }
 	
-	ui->factorycb->addItem("FC");
+    //ui->factorycb->addItem("FC");
 
-    for(int i = 1 ; i <= 3 ; i++)
+    for(int i = 1 ; i <= 8 ; i++)
     {
         QString s = "F";
         s.append(QString::number(i));
@@ -533,7 +533,7 @@ void MainWindow::updateCurIdx(int idx)
 
     if(this->curIdx >= this->res->getSize())
     {
-        this->on_ResetButton_clicked();
+
         if(this->res->getSize() == 0)
         {
             s.append("Barcode");
@@ -541,6 +541,7 @@ void MainWindow::updateCurIdx(int idx)
         else
         {
             s.append("OK");
+            this->on_ResetButton_clicked();
         }
 
         this->curIdx = this->res->getSize();

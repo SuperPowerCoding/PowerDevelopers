@@ -32,6 +32,8 @@ using Cognex.VisionPro.PMAlign;
 using Cognex.VisionPro.ImageFile;
 using Cognex.VisionPro.ID;
 using Cognex.VisionPro.Dimensioning;
+using Cognex.VisionPro.SearchMax;
+using Cognex.VisionPro.Blob;
 
 
 
@@ -1079,7 +1081,14 @@ namespace EfficientApp
                     reqCmd.subItemID = subItem;
                 }
 
-                myJob = myJobManager.Job(string.Format("SubItem{0}", subItem));
+                if(subItem == 2009 || subItem == 2010 || subItem == 2011)
+                {
+                    myJob = myJobManager.Job("SubItem2009");
+                }
+                else
+                {
+                    myJob = myJobManager.Job(string.Format("SubItem{0}", subItem));
+                }
 
                 CogToolGroup myTG = myJob.VisionTool as CogToolGroup;
                 CogImageFileTool myIFTool = myTG.Tools["CogImageFileTool1"] as CogImageFileTool;
@@ -1102,24 +1111,56 @@ namespace EfficientApp
                 }
 
                 CogPMAlignResults myPMAlignResults;
-                if(subItem == 2014)
+                CogSearchMaxResults mySearchMaxResults;
+                int Count = 0;
+                double Score = 0;
+                double TranslationX = 0;
+                double TranslationY = 0;
+                if (subItem == 2005)
                 {
                     CogPMAlignMultiTool myPMAlignMultiTool = myTG.Tools["CogPMAlignMultiTool1"] as CogPMAlignMultiTool;
                     myPMAlignResults = myPMAlignMultiTool.Results.PMAlignResults;
 
+                    if(myPMAlignResults.Count > 0)
+                    {
+                        Count = myPMAlignResults.Count;
+                        Score = myPMAlignResults[0].Score;
+                        TranslationX = myPMAlignResults[0].GetPose().TranslationX;
+                        TranslationY = myPMAlignResults[0].GetPose().TranslationY;
+                    }
+                }
+                else if(subItem == 2014 || subItem == 2016)
+                {
+                    CogSearchMaxTool mySearchMaxTool = myTG.Tools["CogSearchMaxTool1"] as CogSearchMaxTool;
+                    mySearchMaxResults = mySearchMaxTool.Results;
+
+                    if (mySearchMaxResults.Count > 0)
+                    {
+                        Count = mySearchMaxResults.Count;
+                        Score = mySearchMaxResults[0].Score;
+                        TranslationX = mySearchMaxResults[0].GetPose().TranslationX;
+                        TranslationY = mySearchMaxResults[0].GetPose().TranslationY;
+                    }
                 }
                 else
                 {
-                CogPMAlignTool myPMAlignTool = myTG.Tools["CogPMAlignTool1"] as CogPMAlignTool;
+                    CogPMAlignTool myPMAlignTool = myTG.Tools["CogPMAlignTool1"] as CogPMAlignTool;
                     myPMAlignResults = myPMAlignTool.Results;
+                    if (myPMAlignResults.Count > 0)
+                    {
+                        Count = myPMAlignResults.Count;
+                        Score = myPMAlignResults[0].Score;
+                        TranslationX = myPMAlignResults[0].GetPose().TranslationX;
+                        TranslationY = myPMAlignResults[0].GetPose().TranslationY;
+                    }
 
                 }
                 
-                if (myPMAlignResults.Count > 0)
+                if (Count > 0)
                 {
-                    byte resultScore = (byte)(myPMAlignResults[0].Score*100);
+                    byte resultScore = (byte)(Score*100);
 
-                    print_log((byte)LogType.info, string.Format("myPMAlignTool.Results[0].Score : {0}", resultScore));
+                    print_log((byte)LogType.info, string.Format("Results[0].Score : {0}", resultScore));
                     //MessageBox.Show(resultId);
                     UpdateGUI(string.Format("Score={0}", resultScore));
                     
@@ -1128,8 +1169,8 @@ namespace EfficientApp
                     respAck.cell_number = reqCmd.cell_number;
                     respAck.process_number = reqCmd.process_number;
                     respAck.matching_rate = resultScore;
-                    respAck.coordinates_x = (int)myPMAlignResults[0].GetPose().TranslationX;
-                    respAck.coordinates_y = (int)myPMAlignResults[0].GetPose().TranslationY;
+                    respAck.coordinates_x = (int)TranslationX;
+                    respAck.coordinates_y = (int)TranslationY;
 
                     respAck.data_size = 0;
 
@@ -1195,7 +1236,7 @@ namespace EfficientApp
                                             break;
 
                                         default:
-                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
                                             break;
                                     }
                                 }
@@ -1204,7 +1245,12 @@ namespace EfficientApp
                             case 2017:
                                 {
                                     CogDistancePointLineTool myDistancePointLineTool = myTG.Tools["CogDistancePointLineTool1"] as CogDistancePointLineTool;
-                                    if(myDistancePointLineTool.Distance < 105)
+
+                                    /* 거리 75~100을 accuracy세팅을 반영해서 적용하도록 */
+                                    /* 100%설정인 경우 거리 75보다 작으면 OK */
+                                    /* 50%설정인 경우 거리 88보다 작으면 OK */
+                                    
+                                    if (myDistancePointLineTool.Distance < (10000 - (reqCmd.accracy * 25)) / 100)
                                     {
                                         respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
                                     }
@@ -1212,6 +1258,8 @@ namespace EfficientApp
                                     {
                                         respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                                     }
+
+                                    respAck.matching_rate = (byte)((100 - (int)myDistancePointLineTool.Distance) * 100 / 25);
                                 }
                                 break;
 
@@ -1241,6 +1289,35 @@ namespace EfficientApp
                                 }
                                 break;
 
+                            case 2038:
+                                {
+                                    CogBlobTool myBlobTool1 = myTG.Tools["CogBlobTool1"] as CogBlobTool;
+                                    CogBlobTool myBlobTool2 = myTG.Tools["CogBlobTool2"] as CogBlobTool;
+                                    if (myBlobTool1.Results.GetBlobs().Count > 0 && myBlobTool2.Results.GetBlobs().Count == 0)
+                                    {
+                                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                    }
+                                    else
+                                    {
+                                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                    }
+                                }
+                                break;
+
+                            case 2040:
+                                {
+                                    CogBlobTool myBlobTool1 = myTG.Tools["CogBlobTool1"] as CogBlobTool;
+                                    CogBlobTool myBlobTool2 = myTG.Tools["CogBlobTool2"] as CogBlobTool;
+                                    if (myBlobTool1.Results.GetBlobs().Count == 0 && myBlobTool2.Results.GetBlobs().Count == 0)
+                                    {
+                                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
+                                    }
+                                    else
+                                    {
+                                        respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                    }
+                                }
+                                break;
                             default:
                                 respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
                                 break;
@@ -1263,7 +1340,7 @@ namespace EfficientApp
                 else
                 {
                     respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
-                    print_log((byte)LogType.info, string.Format("myPMAlignTool.Results.Count : {0}", myPMAlignResults.Count));
+                    print_log((byte)LogType.info, string.Format("myPMAlignTool.Results.Count : {0}", Count));
                     backupImages(ref reqCmd, null, null, respAck.cmd_type);
                 }
 

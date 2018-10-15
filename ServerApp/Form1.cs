@@ -231,12 +231,12 @@ namespace EfficientApp
         String verificationFile = "verification.jpg";
         String vppFilePath = Application.StartupPath + @"\K595NP.vpp";
         String logBackupPath = Application.StartupPath + @"\LOG";
+        String logoImgFile = Application.StartupPath + @"\logo.jpg";
         private StreamWriter _write;
         private FileStream _fs;
         MySqlConnection mySqlConn;
         internal System.Windows.Forms.Label Label1;
         internal System.Windows.Forms.TextBox myCountText;
-        internal System.Windows.Forms.TextBox SampleTextBox;
         private delegate void UpdateString(string text);
         CogJobManager myJobManager;
         CogJob myJob;
@@ -265,12 +265,12 @@ namespace EfficientApp
         private Label label2;
         private TextBox textBox1;
         private Button DirSelect;
-        private Button DBTest;
         private GroupBox groupBox2;
         private Label FileLabel;
         private TextBox textBox2;
         private Button VppSelect;
         private GroupBox groupBox3;
+        private PictureBox pictureBox1;
         private Stopwatch stopWatch = new Stopwatch();
 
         //		C# is a multi-threaded language, unlike VB6. Because of this, one must be careful
@@ -475,7 +475,6 @@ namespace EfficientApp
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.Label1 = new System.Windows.Forms.Label();
             this.myCountText = new System.Windows.Forms.TextBox();
-            this.SampleTextBox = new System.Windows.Forms.TextBox();
             this.cogRecordDisplay1 = new Cognex.VisionPro.CogRecordDisplay();
             this.HostNameTextBox = new System.Windows.Forms.TextBox();
             this.HostNameLabel = new System.Windows.Forms.Label();
@@ -485,46 +484,42 @@ namespace EfficientApp
             this.OutputTextBox = new System.Windows.Forms.TextBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.DirSelect = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.DBTest = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.FileLabel = new System.Windows.Forms.Label();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.VppSelect = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.cogRecordDisplay1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PortNumberBox)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // Label1
             // 
-            this.Label1.Location = new System.Drawing.Point(10, 400);
+            this.Label1.Font = new System.Drawing.Font("Gulim", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.Label1.Location = new System.Drawing.Point(681, 70);
             this.Label1.Name = "Label1";
-            this.Label1.Size = new System.Drawing.Size(48, 19);
+            this.Label1.Size = new System.Drawing.Size(84, 36);
             this.Label1.TabIndex = 4;
             this.Label1.Text = "Status";
             // 
             // myCountText
             // 
-            this.myCountText.Location = new System.Drawing.Point(41, 422);
+            this.myCountText.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.myCountText.Enabled = false;
+            this.myCountText.Font = new System.Drawing.Font("Gulim", 48F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.myCountText.Location = new System.Drawing.Point(784, 69);
             this.myCountText.Name = "myCountText";
             this.myCountText.ReadOnly = true;
-            this.myCountText.Size = new System.Drawing.Size(86, 21);
+            this.myCountText.Size = new System.Drawing.Size(329, 81);
             this.myCountText.TabIndex = 3;
-            // 
-            // SampleTextBox
-            // 
-            this.SampleTextBox.Location = new System.Drawing.Point(139, 536);
-            this.SampleTextBox.Multiline = true;
-            this.SampleTextBox.Name = "SampleTextBox";
-            this.SampleTextBox.ReadOnly = true;
-            this.SampleTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.SampleTextBox.Size = new System.Drawing.Size(526, 85);
-            this.SampleTextBox.TabIndex = 5;
+            this.myCountText.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // cogRecordDisplay1
             // 
@@ -535,18 +530,18 @@ namespace EfficientApp
             this.cogRecordDisplay1.ColorMapUpperRoiLimit = 1D;
             this.cogRecordDisplay1.DoubleTapZoomCycleLength = 2;
             this.cogRecordDisplay1.DoubleTapZoomSensitivity = 2.5D;
-            this.cogRecordDisplay1.Location = new System.Drawing.Point(139, 207);
+            this.cogRecordDisplay1.Location = new System.Drawing.Point(15, 164);
             this.cogRecordDisplay1.MouseWheelMode = Cognex.VisionPro.Display.CogDisplayMouseWheelModeConstants.Zoom1;
             this.cogRecordDisplay1.MouseWheelSensitivity = 1D;
             this.cogRecordDisplay1.Name = "cogRecordDisplay1";
             this.cogRecordDisplay1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("cogRecordDisplay1.OcxState")));
-            this.cogRecordDisplay1.Size = new System.Drawing.Size(526, 323);
+            this.cogRecordDisplay1.Size = new System.Drawing.Size(1098, 734);
             this.cogRecordDisplay1.TabIndex = 6;
             // 
             // HostNameTextBox
             // 
             this.HostNameTextBox.BackColor = System.Drawing.SystemColors.Control;
-            this.HostNameTextBox.Location = new System.Drawing.Point(83, 12);
+            this.HostNameTextBox.Location = new System.Drawing.Point(83, 22);
             this.HostNameTextBox.Name = "HostNameTextBox";
             this.HostNameTextBox.Size = new System.Drawing.Size(203, 21);
             this.HostNameTextBox.TabIndex = 7;
@@ -554,7 +549,7 @@ namespace EfficientApp
             // HostNameLabel
             // 
             this.HostNameLabel.AutoSize = true;
-            this.HostNameLabel.Location = new System.Drawing.Point(10, 15);
+            this.HostNameLabel.Location = new System.Drawing.Point(10, 25);
             this.HostNameLabel.Name = "HostNameLabel";
             this.HostNameLabel.Size = new System.Drawing.Size(71, 12);
             this.HostNameLabel.TabIndex = 8;
@@ -563,7 +558,7 @@ namespace EfficientApp
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(310, 15);
+            this.label3.Location = new System.Drawing.Point(310, 25);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(62, 12);
             this.label3.TabIndex = 8;
@@ -571,7 +566,7 @@ namespace EfficientApp
             // 
             // PortNumberBox
             // 
-            this.PortNumberBox.Location = new System.Drawing.Point(378, 12);
+            this.PortNumberBox.Location = new System.Drawing.Point(378, 22);
             this.PortNumberBox.Maximum = new decimal(new int[] {
             65536,
             0,
@@ -593,7 +588,7 @@ namespace EfficientApp
             // 
             // ListenButton
             // 
-            this.ListenButton.Location = new System.Drawing.Point(513, 5);
+            this.ListenButton.Location = new System.Drawing.Point(513, 15);
             this.ListenButton.Name = "ListenButton";
             this.ListenButton.Size = new System.Drawing.Size(85, 32);
             this.ListenButton.TabIndex = 10;
@@ -606,11 +601,11 @@ namespace EfficientApp
             this.OutputTextBox.AcceptsReturn = true;
             this.OutputTextBox.BackColor = System.Drawing.SystemColors.Control;
             this.OutputTextBox.ImeMode = System.Windows.Forms.ImeMode.Hangul;
-            this.OutputTextBox.Location = new System.Drawing.Point(671, 82);
+            this.OutputTextBox.Location = new System.Drawing.Point(15, 904);
             this.OutputTextBox.Multiline = true;
             this.OutputTextBox.Name = "OutputTextBox";
             this.OutputTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.OutputTextBox.Size = new System.Drawing.Size(275, 323);
+            this.OutputTextBox.Size = new System.Drawing.Size(809, 85);
             this.OutputTextBox.TabIndex = 11;
             // 
             // checkBox1
@@ -618,7 +613,7 @@ namespace EfficientApp
             this.checkBox1.AutoSize = true;
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(12, 50);
+            this.checkBox1.Location = new System.Drawing.Point(6, 0);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(69, 16);
             this.checkBox1.TabIndex = 12;
@@ -630,13 +625,23 @@ namespace EfficientApp
             this.groupBox1.Controls.Add(this.groupBox2);
             this.groupBox1.Controls.Add(this.DirSelect);
             this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.textBox1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 50);
+            this.groupBox1.Location = new System.Drawing.Point(639, 5);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(474, 47);
             this.groupBox1.TabIndex = 13;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "groupBox1";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Location = new System.Drawing.Point(3, 64);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(471, 53);
+            this.groupBox2.TabIndex = 3;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "groupBox2";
             // 
             // DirSelect
             // 
@@ -666,25 +671,6 @@ namespace EfficientApp
             this.textBox1.TabIndex = 0;
             this.textBox1.Text = logBackupPath;
             // 
-            // DBTest
-            // 
-            this.DBTest.Location = new System.Drawing.Point(513, 60);
-            this.DBTest.Name = "DBTest";
-            this.DBTest.Size = new System.Drawing.Size(75, 23);
-            this.DBTest.TabIndex = 14;
-            this.DBTest.Text = "DB Test";
-            this.DBTest.UseVisualStyleBackColor = true;
-            this.DBTest.Click += new System.EventHandler(this.DBTest_Click);
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Location = new System.Drawing.Point(3, 64);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(471, 53);
-            this.groupBox2.TabIndex = 3;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "groupBox2";
-            // 
             // FileLabel
             // 
             this.FileLabel.AutoSize = true;
@@ -698,13 +684,13 @@ namespace EfficientApp
             // 
             this.textBox2.Location = new System.Drawing.Point(71, 14);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(289, 21);
+            this.textBox2.Size = new System.Drawing.Size(415, 21);
             this.textBox2.TabIndex = 16;
             this.textBox2.Text = vppFilePath;
             // 
             // VppSelect
             // 
-            this.VppSelect.Location = new System.Drawing.Point(378, 12);
+            this.VppSelect.Location = new System.Drawing.Point(501, 12);
             this.VppSelect.Name = "VppSelect";
             this.VppSelect.Size = new System.Drawing.Size(75, 23);
             this.VppSelect.TabIndex = 17;
@@ -717,20 +703,28 @@ namespace EfficientApp
             this.groupBox3.Controls.Add(this.FileLabel);
             this.groupBox3.Controls.Add(this.VppSelect);
             this.groupBox3.Controls.Add(this.textBox2);
-            this.groupBox3.Location = new System.Drawing.Point(12, 103);
+            this.groupBox3.Location = new System.Drawing.Point(12, 58);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(474, 45);
+            this.groupBox3.Size = new System.Drawing.Size(586, 45);
             this.groupBox3.TabIndex = 18;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Vpp File";
             // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(849, 904);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(264, 85);
+            this.pictureBox1.TabIndex = 19;
+            this.pictureBox1.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-            this.ClientSize = new System.Drawing.Size(959, 633);
+            this.ClientSize = new System.Drawing.Size(1131, 996);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.DBTest);
-            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.OutputTextBox);
             this.Controls.Add(this.ListenButton);
@@ -739,7 +733,6 @@ namespace EfficientApp
             this.Controls.Add(this.HostNameLabel);
             this.Controls.Add(this.HostNameTextBox);
             this.Controls.Add(this.cogRecordDisplay1);
-            this.Controls.Add(this.SampleTextBox);
             this.Controls.Add(this.myCountText);
             this.Controls.Add(this.Label1);
             this.Name = "Form1";
@@ -750,6 +743,7 @@ namespace EfficientApp
             this.groupBox1.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1873,6 +1867,15 @@ namespace EfficientApp
                             netStream.Write(responseBuffer, 0, responseBuffer.Length);                            
                             netStream.Flush();
 
+                            if (respAck.cmd_type == (byte)CmdType.CMD_TYPE_ACK)
+                            {
+                                SetStatusText("OK");
+                            }
+                            else
+                            {
+                                SetStatusText("NG");
+                            }
+
                             if (respAck.cmd_type == (byte)CmdType.CMD_TYPE_ACK && reqCmd.product_str != null &&
                                 reqCmd.serial_str != null && reqCmd.action_type != (byte)ActionType.judgement)
                             {
@@ -2144,6 +2147,27 @@ namespace EfficientApp
                         break;
                 }                
                 _write.Flush();
+            }
+        }
+
+        private void SetStatusText(string res)
+        {
+            if (myCountText.InvokeRequired)
+                myCountText.BeginInvoke(new UpdateString(SetStatusText), new object[] { res });
+            else
+            {
+            if(res.Equals("OK") == true)
+            {
+                myCountText.BackColor = System.Drawing.Color.GreenYellow;
+                myCountText.ForeColor = System.Drawing.Color.Black;
+            }
+            else
+            {
+                myCountText.BackColor = System.Drawing.Color.Red;
+                myCountText.ForeColor = System.Drawing.Color.Yellow;
+            }
+
+            myCountText.Text = res;
             }
         }
 

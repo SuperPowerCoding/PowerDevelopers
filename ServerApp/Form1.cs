@@ -1010,7 +1010,7 @@ namespace EfficientApp
                     }
                     else
                     {
-                        if (CheckBarcodeValue(reqCmd, respAck))
+                        if (CheckBarcodeValue(ref reqCmd, respAck))
                         {
                             respAck.cmd_type = (byte)CmdType.CMD_TYPE_ACK;
                         }
@@ -1361,19 +1361,21 @@ namespace EfficientApp
             return respAck;
         }
 
-        public RespAck CogActJudgement(ref ReqCmd reqCmd)
+        public RespAck CogActJudgement(ref ReqCmd reqCmd, ref RespAck respAck)
         {
-            RespAck respAck = new RespAck();
+            //RespAck respAck = new RespAck();
             string sql;
             MySqlCommand cmd;
             string process = null;
 
-            respAck.action_type = reqCmd.action_type;
-            respAck.item_id = reqCmd.item_id;
-            respAck.cell_number = reqCmd.cell_number;
-            respAck.process_number = reqCmd.process_number;
-            respAck.data_size = 0;
+            //respAck.action_type = reqCmd.action_type;
+            //respAck.item_id = reqCmd.item_id;
+            //respAck.cell_number = reqCmd.cell_number;
+            //respAck.process_number = reqCmd.process_number;
+            //respAck.data_size = 0;
 
+#if false
+            /* 특정 공정에 대해서만 체크유무 결과 확인 */
             sql = "SELECT Process FROM processnum WHERE Value=" + string.Format("{0}",reqCmd.process_number);
             cmd = new MySqlCommand(sql, mySqlConn);
 
@@ -1432,6 +1434,89 @@ namespace EfficientApp
 
                 return respAck;
             }
+#else
+            int process_fc = 0;
+            int process_val = 0;
+            int seqCount = 0;
+            int[] seqArr = new int[255];
+
+            sql = "SELECT Value FROM processnum WHERE Process='FC'";
+            cmd = new MySqlCommand(sql, mySqlConn);
+
+            cmd.ExecuteNonQuery();
+
+            bool ResultExist = false;
+            MySqlDataReader reader = cmd.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                reader.Read();
+                process_fc = reader.GetInt32(0);
+                ResultExist = true;
+            }
+            reader.Close();
+
+            if (!ResultExist)
+            {
+                respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                print_log((byte)LogType.info, "There is No FC Process!!");
+
+                return respAck;
+            }
+
+            for (process_val = 1; process_val < process_fc; process_val++)
+            {
+                sql = "SELECT Process FROM processnum WHERE Value=" + string.Format("{0}", process_val);
+                cmd = new MySqlCommand(sql, mySqlConn);
+
+                cmd.ExecuteNonQuery();
+
+                ResultExist = false;
+                reader = cmd.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    process = reader.GetString(0);
+                    ResultExist = true;
+                }
+                reader.Close();
+
+                if (!ResultExist)
+                {
+                    respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                    print_log((byte)LogType.info, string.Format("Wrong Process Num!! : {0}", reqCmd.process_number));
+
+                    return respAck;
+                }
+
+                sql = "SELECT * from process WHERE Type='" + reqCmd.product_str + "'" + " AND Process='" + process + "'";
+                cmd = new MySqlCommand(sql, mySqlConn);
+
+                cmd.ExecuteNonQuery();
+
+
+
+                ResultExist = false;
+                reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    ResultExist = true;
+
+                    reader.Read();
+
+                    for (int i = 2; i < reader.VisibleFieldCount; i++)
+                    {
+                        if (reader.IsDBNull(i) != true && reader.GetInt32(i) != 0)
+                        {
+                            seqArr[seqCount] = reader.GetInt32(i);
+                            seqCount++;
+                        }
+                    }
+                }
+                reader.Close();
+            }
+#endif
 
             sql = "SELECT * from resultcheck WHERE SerialNumber='" + reqCmd.serial_str + "'";
             cmd = new MySqlCommand(sql, mySqlConn);
@@ -1477,6 +1562,11 @@ namespace EfficientApp
                     print_log((byte)LogType.info, string.Format("Item was not checked!! : {0}", seqArr[i]));
                     check_ok = false;
                 }                
+            }
+
+            if(seqCount == 0)
+            {
+                check_ok = false;
             }
 
             if (check_ok)
@@ -1688,7 +1778,24 @@ namespace EfficientApp
                                                     break;
 
                                                 case (byte)ActionType.judgement:
-                                                    respAck = CogActJudgement(ref reqCmd);
+                                                    myJob = myJobManager.Job("Barcode_1D");
+                                                    respAck = CogActBarcode(ref reqCmd);
+
+                                                    if (respAck.cmd_type == (byte)CmdType.CMD_TYPE_ACK)
+                                                    {
+                                                        OrderContents orderCont = new OrderContents();
+                                                        if (orderCont.analysis(respAck.data) == 0)
+                                                        {
+                                                            reqCmd.product_str = orderCont.first_class + orderCont.second_class;
+                                                            reqCmd.serial_str = orderCont.SerialNum;
+
+                                                            CogActJudgement(ref reqCmd, ref respAck);
+                                                        }
+                                                        else
+                                                        {
+                                                            respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
+                                                        }
+                                                    }                                                    
                                                     break;
 
                                                 default:
@@ -1864,7 +1971,7 @@ namespace EfficientApp
 
         }
 
-        public bool CheckBarcodeValue(ReqCmd reqCmd, RespAck respAck)
+        public bool CheckBarcodeValue(ref ReqCmd reqCmd, RespAck respAck)
         {
 
             bool rtn = false;
@@ -1890,6 +1997,8 @@ namespace EfficientApp
 
             if (subWorkItem != 0)
             {
+                reqCmd.subItemID = subWorkItem;
+
                 sql = "SELECT Value from subworkitems WHERE ID=" + string.Format("{0}", subWorkItem);
                 cmd = new MySqlCommand(sql, mySqlConn);
 
@@ -1904,7 +2013,7 @@ namespace EfficientApp
                 }
                 reader.Close();
 
-                if (reqCmd.item_id == 111)
+                if (reqCmd.item_id >= 101 && reqCmd.item_id <= 112)
                 {
                     if(value_str.Substring(0,4).Equals(respAck.data.Substring(0,4)))
                     {

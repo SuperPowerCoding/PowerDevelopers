@@ -225,6 +225,10 @@ int receiveFunc(char *data)
         /*in case of unkown cmd */
 	}
 
+    if(strcmp(seProc_step, "FC") == 0)
+    {
+        transfer_proc_reset();
+    }
 
 	free(info);
 
@@ -552,7 +556,15 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
         memset(pack, 0, sizeof(packInfo_tx));
 
         pack->cmd_type = CMD_TYPE_REQUEST; //fixed
-        pack->action_type = ACT_BARCODE1D;
+
+        if(strcmp(seProc_step, "FC") == 0)
+        {
+            cout <<"ACT_JUDGEMENT"<<endl;
+            pack->action_type = ACT_JUDGEMENT;
+        }
+        else{
+            pack->action_type = ACT_BARCODE1D;
+        }
         pack->item_id = WORK_ORDER;
         pack->cell_num = 1;
         pack->process_num = seProc_value; //would it be got from db server

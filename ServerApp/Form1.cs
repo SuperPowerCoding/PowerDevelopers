@@ -119,7 +119,7 @@ namespace EfficientApp
             {
                 if (size < Constants.ReqCmdPckSize)
                 {
-                    MessageBox.Show("size wrong");
+                    //MessageBox.Show("size wrong");
                     return (int)PacketReturn.ng;
                 }
 
@@ -128,7 +128,7 @@ namespace EfficientApp
                 this.cmd_type = buf[i++];
                 if (this.cmd_type != (byte)CmdType.CMD_TYPE_REQUEST)
                 {
-                    MessageBox.Show("CMD Wrong");
+                    //MessageBox.Show("CMD Wrong");
                     return (int)PacketReturn.ng;
                 }
 
@@ -143,7 +143,7 @@ namespace EfficientApp
                 {
                     if((this.order_size+i) > (size-4))
                     {
-                        MessageBox.Show("order size wrong");
+                        //MessageBox.Show("order size wrong");
                         return (int)PacketReturn.ng;
                     }
                     
@@ -160,13 +160,13 @@ namespace EfficientApp
                     }
                     else
                     {
-                        MessageBox.Show("order string wrong");
+                        //MessageBox.Show("order string wrong");
                         return (int)PacketReturn.ng;
                     }
                 }
                 else if (this.item_id != (byte)WorkItems.order)
                 {
-                    MessageBox.Show("must be order item id");
+                    //MessageBox.Show("must be order item id");
                     return (int)PacketReturn.ng;
                 }
 
@@ -502,7 +502,7 @@ namespace EfficientApp
             // 
             // Label1
             // 
-            this.Label1.Font = new System.Drawing.Font("Gulim", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.Label1.Font = new System.Drawing.Font("±¼¸²", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.Label1.Location = new System.Drawing.Point(681, 70);
             this.Label1.Name = "Label1";
             this.Label1.Size = new System.Drawing.Size(84, 36);
@@ -513,11 +513,11 @@ namespace EfficientApp
             // 
             this.myCountText.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.myCountText.Enabled = false;
-            this.myCountText.Font = new System.Drawing.Font("Gulim", 48F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.myCountText.Font = new System.Drawing.Font("±¼¸²", 51.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.myCountText.Location = new System.Drawing.Point(784, 69);
             this.myCountText.Name = "myCountText";
             this.myCountText.ReadOnly = true;
-            this.myCountText.Size = new System.Drawing.Size(329, 81);
+            this.myCountText.Size = new System.Drawing.Size(329, 87);
             this.myCountText.TabIndex = 3;
             this.myCountText.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -535,7 +535,7 @@ namespace EfficientApp
             this.cogRecordDisplay1.MouseWheelSensitivity = 1D;
             this.cogRecordDisplay1.Name = "cogRecordDisplay1";
             this.cogRecordDisplay1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("cogRecordDisplay1.OcxState")));
-            this.cogRecordDisplay1.Size = new System.Drawing.Size(1098, 734);
+            this.cogRecordDisplay1.Size = new System.Drawing.Size(1098, 763);
             this.cogRecordDisplay1.TabIndex = 6;
             // 
             // HostNameTextBox
@@ -599,13 +599,13 @@ namespace EfficientApp
             // OutputTextBox
             // 
             this.OutputTextBox.AcceptsReturn = true;
-            this.OutputTextBox.BackColor = System.Drawing.SystemColors.Control;
+            this.OutputTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.OutputTextBox.ImeMode = System.Windows.Forms.ImeMode.Hangul;
-            this.OutputTextBox.Location = new System.Drawing.Point(15, 904);
+            this.OutputTextBox.Location = new System.Drawing.Point(1137, 164);
             this.OutputTextBox.Multiline = true;
             this.OutputTextBox.Name = "OutputTextBox";
             this.OutputTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.OutputTextBox.Size = new System.Drawing.Size(809, 85);
+            this.OutputTextBox.Size = new System.Drawing.Size(465, 763);
             this.OutputTextBox.TabIndex = 11;
             // 
             // checkBox1
@@ -713,16 +713,16 @@ namespace EfficientApp
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(849, 904);
+            this.pictureBox1.Location = new System.Drawing.Point(1338, 12);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(264, 85);
+            this.pictureBox1.Size = new System.Drawing.Size(264, 87);
             this.pictureBox1.TabIndex = 19;
             this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
-            this.ClientSize = new System.Drawing.Size(1131, 996);
+            this.ClientSize = new System.Drawing.Size(1614, 930);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
@@ -787,7 +787,7 @@ namespace EfficientApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                //MessageBox.Show(this, ex.Message);
                 print_log((byte)LogType.err, ex.Message);
             }            
         }
@@ -931,7 +931,13 @@ namespace EfficientApp
                     + string.Format("cell{0}_process{1}_", reqCmd.cell_number, reqCmd.process_number) + saveFileName;
             }
 
-            cogRecordDisplay1.CreateContentBitmap(CogDisplayContentBitmapConstants.Image).Save(strFileTmp, System.Drawing.Imaging.ImageFormat.Jpeg);
+            //cogRecordDisplay1.CreateContentBitmap(CogDisplayContentBitmapConstants.Image).Save(strFileTmp, System.Drawing.Imaging.ImageFormat.Jpeg);
+            FileInfo fInfo = new FileInfo(verificationDirectory + verificationFile);
+            if (fInfo.Exists)
+            {
+                fInfo.CopyTo(strFileTmp, true);                
+                //fi.Delete();
+            }
             reqCmd.saveFilePath = strFileTmp;
             print_log((byte)LogType.info, "File Saved at " + strFileTmp);
             UpdateGUI("save " + saveFileName);  
@@ -1038,7 +1044,7 @@ namespace EfficientApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
                 respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                 print_log((byte)LogType.err, ex.Message);
             }
@@ -1347,7 +1353,7 @@ namespace EfficientApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+               // MessageBox.Show(ex.Message);
                 respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                 print_log((byte)LogType.err, ex.Message);
             }
@@ -1662,7 +1668,7 @@ namespace EfficientApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                //MessageBox.Show(ex.Message);
                 respAck.cmd_type = (byte)CmdType.CMD_TYPE_NACK;
                 print_log((byte)LogType.err, ex.Message);
             }
@@ -1892,6 +1898,8 @@ namespace EfficientApp
                                     result_detail = respAck.data;
                                 }
 
+                                lock (_CogLock)
+                                {
                                 /* LOG INSERT */
                                 //MySqlCommand mySqlCommand = mySqlConn.CreateCommand();
                                 //mySqlCommand.CommandText = "insert into k595np values('"+reqCmd.product_str+"', '"+reqCmd.serial_str+"', '"+respAck.action_type+"', '"+respAck.item_id+"', '"+result_detail+"', '"+ reqCmd.cur_date + "', '"+reqCmd.start_time+"', '"+reqCmd.end_time+"', '"+reqCmd.due_msec+"', '"+reqCmd.cell_number+"', '"+reqCmd.process_number+"', '"+reqCmd.saveFilePath+"');";
@@ -1937,6 +1945,7 @@ namespace EfficientApp
                             }
                         }
                     }
+                }
                 }
                 catch(Exception ex)
                 {
@@ -2086,7 +2095,7 @@ namespace EfficientApp
                 this.BeginInvoke(new UpdateString(DisplayError), new object[] { message });
             else
             {
-                MessageBox.Show(this, message, "QuickBuild Server Sample");
+                //MessageBox.Show(this, message, "QuickBuild Server Sample");
                 print_log((byte)LogType.err, message);
             }
         }

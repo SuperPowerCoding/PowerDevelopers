@@ -130,6 +130,20 @@ int Buzzer::getSize()
 }
 
 
+void Buzzer::playFinMelody()
+{
+    /*
+    this->addNote(tones[5][C],8);
+    this->addNote(REST,16);
+    this->addNote(tones[5][E],8);
+    this->addNote(REST,16);
+    this->addNote(tones[5][G],8);
+    this->addNote(REST,16);
+    this->addNote(tones[6][C],8);
+    this->addNote(REST,16);
+    */
+}
+
 void Buzzer::playGetCoinMelody()
 {
     this->addMelody(getCoin[0],getCoin[1],sizeof(getCoin[0])/sizeof(int),false);
@@ -153,10 +167,12 @@ void Buzzer::playBubbleBubble()
 
 void Buzzer::playWrongMelody()
 {
+    /*
     this->addNote(tones[5][A],8);
     this->addNote(REST,16);
     this->addNote(tones[5][A],2);
     this->addNote(REST,16);
+    */
 }
 
 void Buzzer::playCaptureMelody()
@@ -167,10 +183,12 @@ void Buzzer::playCaptureMelody()
 
 void Buzzer::playCaptureResultOKMelody()
 {
+    /*
     this->addNote(tones[5][G],32);
     this->addNote(REST,32);
     this->addNote(tones[5][G],32);
     this->addNote(REST,32);
+    */
 }
 
 void Buzzer::playGetStartMelody()

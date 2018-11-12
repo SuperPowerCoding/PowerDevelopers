@@ -130,7 +130,7 @@ typedef struct jobinfo
 extern bool setSendRequest(packInfo_tx *sInfo);
 extern void getDevOrderNumber(char *num);
 extern int buildPacket(packInfo_tx *info);
-extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx);
+extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, int accuracy);
 //extern int transfer_proc_init(void);
 //extern int transfer_data_proc(void);
 //extern void setNetworkHandler(Network* net);

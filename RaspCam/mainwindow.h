@@ -76,6 +76,8 @@ private slots:
 
     void on_cellinfocb_currentTextChanged(const QString &arg1);
 
+    void on_updateButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     Camera * camTh = NULL;
@@ -126,6 +128,7 @@ private:
 
 signals :
     void updateRawImgFin();
+    void updateDbReq();
 };
 
 #endif // MAINWINDOW_H

@@ -9,6 +9,9 @@
 
 
 #define KeyPin  2
+#define LedGreen    23
+#define LedYellow   24
+#define LedRed	    25
 
 class Key : public QThread
 {
@@ -18,7 +21,10 @@ public:
     Key();
 
     bool isEnabled();
-
+    void setRed(bool onoff);
+    void setGreen(bool onoff);
+    void setYellow(bool onoff);
+    void setLeds(bool red, bool green, bool yellow);
 
 private:
     unsigned int pollingPeriod;

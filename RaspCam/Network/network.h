@@ -15,7 +15,7 @@ class Network : public QThread
 public:
     Network(unsigned int msecPollingPeriod, Resource * res);
 
-    void setRawImgData(uchar * data, int size, int index);
+    void setRawImgData(uchar * data, int size, int index, int accuracy);
 	uchar * getRawImgData(void);
 
 
@@ -56,7 +56,6 @@ public:
     int getImgRate(void);
     Resource * res;
 	
-	
 	bool resetFlag;
 	bool userSettingFlag;
 
@@ -72,7 +71,7 @@ private:
     char process[3];
     char cellInfo[20];
     int port = 8080;
-    int imgMatchRate = 75;
+    int imgMatchRate = 65;
     QMutex settingMutex;
 
 
@@ -80,6 +79,7 @@ private:
 	uchar * rawDataImg;
 	int rawDataImgSize;
     int rawDataIndex;
+    int rawDataAccuracy;
 
     static Network net_instance;    
 	
@@ -87,6 +87,7 @@ private:
 
 private slots:
     void sendRawImgData();
+    void updateDbAccuracies();
 	
 signals :
     void imgProcessFin();       // image process fininshed

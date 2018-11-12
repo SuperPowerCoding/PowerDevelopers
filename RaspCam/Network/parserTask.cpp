@@ -13,6 +13,7 @@
 //#include <mutex>
 #include <fstream>
 #include <QDebug>
+#include <QTime>
 
 #include "parserInfo.h"
 #include "tcp_sock.h"
@@ -37,6 +38,7 @@ packInfo_tx proc_seq_table[D_MAX_PROC_SEQ];
 unsigned int totalTbCounter;
 static unsigned int procCounter = 0;
 unsigned char proc_seq_order[D_MAX_PROC_SEQ];
+int proc_seq_accuracy[D_MAX_PROC_SEQ];
 
 int appendJob(jobInfo_t *job);
 void deleteJob(jobInfo_t *job);
@@ -124,6 +126,8 @@ extern int transfer_data_proc(void)
 #if 1
     if(!job_list.empty())
 	{
+        QTime time;
+        time.start();
         //State = JS_PROCESSING;
         cout <<"Entered hostname : "<<host<<":"<<port<<endl;
         //connect to host
@@ -147,7 +151,7 @@ extern int transfer_data_proc(void)
         comm.receive((jobInfo_t*)currentJobData);
 		//deleteJob(temp);
 
-
+        cout<<"[TIME] transfer_data_proc : "<<time.elapsed()<<endl;
 	}
 
 #endif
@@ -161,10 +165,17 @@ extern void setNetworkHandler(Network* net)
     netHander = net;
 }
 
+Network* getNetworkHandler(void)
+{
+    return netHander;
+}
+
 int receiveFunc(char *data)
 {
+    QTime time;
 	bool ret;
 	cout << "[call]" << __FUNCTION__ <<endl;
+    time.start();
 
     packInfo_rx *info = (packInfo_rx*)malloc(sizeof(packInfo_rx));
     memset(info, 0, sizeof(packInfo_rx));
@@ -236,13 +247,15 @@ int receiveFunc(char *data)
     //temporarily call
     comm.close_sock();
 
-
+    cout<<"[TIME] receiveFunc : "<<time.elapsed()<<endl;
 	return 1;
 }
 
 
 int buildPacket(packInfo_tx *info)
 {
+    QTime time;
+    time.start();
 	int buf_size = info->image_size+info->order_size+D_HEADER_SIZE;
 	char *rq_data = (char*)malloc(sizeof(char)*buf_size);
 	memset(rq_data, 0, sizeof(char)*buf_size);
@@ -274,18 +287,23 @@ int buildPacket(packInfo_tx *info)
 	//add job
 	appendJob(newJob);
 
+    cout<<"[TIME] buildPacket : "<<time.elapsed()<<endl;
+
 	return 1;
 }
 
 
 int appendJob(jobInfo_t *job)
 {
+    QTime time;
+    time.start();
 	cout << "[push] new job" << endl;
 	//unique_lockMedics mlock(mutex_);
 	job_list.push((jobInfo_t*)job);
 	//mlock.unlock();     // unlock before notificiation to minimize mutex contention
 	//cond_.notify_one(); // notify one waiting thread
 
+    cout<<"[TIME] appendJob : "<<time.elapsed()<<endl;
 	return 1;
 }
 
@@ -392,6 +410,7 @@ extern int transfer_proc_init(void)
 
     memset(proc_seq_table, 0, sizeof(proc_seq_table)); //reset buffer to restore proc sequence table
     memset(proc_seq_order, 0, sizeof(proc_seq_order));
+    memset(proc_seq_accuracy, 0, sizeof(proc_seq_accuracy));
     memset(full_order_num, 0, D_MAX_RESP_NUM);
     memset(order_num, 0, D_MAX_ORD_NUM);
     totalTbCounter = 0;
@@ -447,8 +466,8 @@ int setProcSequence(void)
     {
         for(unsigned int i =0; i<totalTbCounter; i++)
         {
-            netHander->res->pushData(NULL, 0, proc_seq_order[i]);
-            printf("sq:%d @ %d\n", i, proc_seq_order[i]);
+            netHander->res->pushData(NULL, 0, proc_seq_order[i], proc_seq_accuracy[i]);
+            printf("sq:%d @ %d / accuracy:%d\n", i, proc_seq_order[i], proc_seq_accuracy[i]);
         }
         iStart = actionlist.begin();
         iEnd = actionlist.end();
@@ -538,12 +557,14 @@ int findWorkIdentity(unsigned char idx, char *act_type, char *item_id)
 
 }
 
-int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
+int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, int accuracy)
 {
-
+    QTime time;
     printf("requestAnalysisToServer: %d /JobState: %d\n", idx, State);
     int ret = 0;
     char act_type =0, item_id = 0;
+
+    time.start();
 
     if(State == JS_ERROR)
     {
@@ -568,7 +589,7 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
         pack->item_id = WORK_ORDER;
         pack->cell_num = 1;
         pack->process_num = seProc_value; //would it be got from db server
-        pack->accuracy = 100; //will set it from UI
+        pack->accuracy = accuracy; //will set it from UI
         pack->order_size = 0;  //will have to make it from pack
         pack->image_size = size;
         pack->image_data = (char*)image;
@@ -590,7 +611,7 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
 
                 pack->cell_num = 1;
                 pack->process_num = seProc_value; //would it be got from db server
-                pack->accuracy = accuracy_rate; //will set it from UI
+                pack->accuracy = accuracy; //will set it from UI
                 pack->order_size = strlen(full_order_num);  //will have to make it from pack
                 strncpy(pack->order_num, full_order_num, pack->order_size);
                 pack->image_size = size;
@@ -616,6 +637,8 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx)
         cout << "Unexpected proc seq num"<<endl;
         return -1;
     }
+
+    cout<<"[TIME] requestAnalysisToServer : "<<time.elapsed()<<endl;
 
     return ret;
 }

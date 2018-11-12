@@ -4,12 +4,16 @@
 #include "parserInfo.h"
 #include "tcp_sock.h"
 #include <cstring>
+#include <QTime>
 
 extern void setNetworkHandler(Network* net);
 extern int transfer_proc_init(void);
 extern int transfer_data_proc(void);
 extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx);
 extern int notifyNumOfProcessSeq(char *PS, unsigned int *cnt);
+extern int updateProcAccuracyFromDB(int accuracy, int item);
+extern int mysql_connect(void);
+extern void mysql_disconnect(void);
 
 Network::Network(unsigned int msecPollingPeriod, Resource * res)
 {
@@ -57,11 +61,12 @@ void Network::run()
 
 }
 
-void Network::setRawImgData(uchar * data, int size, int index)
+void Network::setRawImgData(uchar * data, int size, int index, int accuracy)
 {
     this->rawDataImg = data;
     this->rawDataImgSize = size;
     this->rawDataIndex = index;
+    this->rawDataAccuracy = accuracy;
 }
 
 uchar * Network::getRawImgData(void)
@@ -82,11 +87,14 @@ uchar * Network::getRawImgData(void)
 void Network::sendRawImgData()
 {
     // plz fill out code
-
+    QTime time;
     //qDebug() << this->rawDataImgSize << endl;
+    time.start();
+    cout<<"[TIME] getRawImg sec : "<<time.second()<<" ms : "<<time.msec()<<endl;
 
    int idx =this->rawDataIndex;
-   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx); //index will be switched by step .
+   int accuracy = this->rawDataAccuracy;
+   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx, accuracy); //index will be switched by step .
 }
 
 void Network::setIpResults(int x, int y,int rate, bool res)
@@ -189,3 +197,28 @@ int Network::getImgRate(void) ////////
     return this->imgMatchRate;
 }
 
+void Network::updateDbAccuracies(void)
+{
+    int totalCnt = this->res->getAccChangedSize();
+
+    int ret = mysql_connect();
+
+    if(ret == 0)
+    {
+        for(int i=0; i<totalCnt; i++)
+        {
+            if(this->res->getAccChangedFlag(i) == true)
+            {
+                int tmpItemNum = this->res->getImgIdx(i);
+                int tmpAccuracy = this->res->getImgAccuracy(i);
+
+                if(tmpItemNum != 0)
+                {
+                    updateProcAccuracyFromDB(tmpAccuracy, tmpItemNum);
+                }
+            }
+        }
+
+        mysql_disconnect();
+    }
+}

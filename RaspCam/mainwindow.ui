@@ -220,7 +220,7 @@
         <rect>
          <x>100</x>
          <y>50</y>
-         <width>321</width>
+         <width>221</width>
          <height>26</height>
         </rect>
        </property>
@@ -262,10 +262,44 @@
         </font>
        </property>
        <property name="text">
-        <string>75%</string>
+        <string>65%</string>
        </property>
        <property name="textFormat">
         <enum>Qt::AutoText</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="currentProcess">
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>40</y>
+         <width>111</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>20</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>N/A</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>350</x>
+         <y>20</y>
+         <width>91</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Current Process</string>
        </property>
       </widget>
      </widget>
@@ -294,9 +328,9 @@
       <widget class="QPushButton" name="exitButton">
        <property name="geometry">
         <rect>
-         <x>370</x>
+         <x>360</x>
          <y>40</y>
-         <width>85</width>
+         <width>91</width>
          <height>28</height>
         </rect>
        </property>
@@ -314,7 +348,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Cell Info</string>
+        <string>Select Cell</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_2">
@@ -322,12 +356,12 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>67</width>
+         <width>91</width>
          <height>21</height>
         </rect>
        </property>
        <property name="text">
-        <string>Process Info</string>
+        <string>Select Process</string>
        </property>
       </widget>
       <widget class="QComboBox" name="cellinfocb">
@@ -338,6 +372,22 @@
          <width>141</width>
          <height>21</height>
         </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="updateButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="geometry">
+        <rect>
+         <x>340</x>
+         <y>0</y>
+         <width>111</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>DB Update</string>
        </property>
       </widget>
      </widget>
@@ -954,7 +1004,7 @@
        </size>
       </property>
       <property name="text">
-       <string>◀</string>
+       <string>?�</string>
       </property>
      </widget>
      <widget class="QPushButton" name="rightButton">
@@ -973,7 +1023,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>▶</string>
+       <string>??/string>
       </property>
      </widget>
      <widget class="QPushButton" name="streamingImg">

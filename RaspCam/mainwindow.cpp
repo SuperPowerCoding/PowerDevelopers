@@ -3,6 +3,7 @@
  * * * * * * * * * * * * * * * * * * * */
 #include <QDebug>
 #include <qevent.h>
+#include <QTime>
 
 /* * * * * * * * * * * * * * * * * * * *
  * include  coustomized header
@@ -13,7 +14,7 @@
 #include "Camera/camera.h"
 #include "config.h"
 
-
+using namespace std;
 
 /*****************************************
  *
@@ -43,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
 	connect(this->netTh, SIGNAL(imgProcessFin()), this, SLOT(updateIPResult()));
     connect(this->netTh, SIGNAL(resourceUpdateFin()), this, SLOT(updateResource()));
+    connect(this, SIGNAL(updateDbReq()), this->netTh, SLOT(updateDbAccuracies()));
     this->netTh->start();
 
     // buzzer init
@@ -67,11 +69,11 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->ipcb4->addItem(s);
     }
 
-    // defulat server ip : 192.168.1.137
+    // defulat server ip : 192.168.1.102
     ui->ipcb1->setCurrentIndex(ui->ipcb1->findText("192"));
     ui->ipcb2->setCurrentIndex(ui->ipcb2->findText("168"));
     ui->ipcb3->setCurrentIndex(ui->ipcb3->findText("1"));
-    ui->ipcb4->setCurrentIndex(ui->ipcb4->findText("137"));
+    ui->ipcb4->setCurrentIndex(ui->ipcb4->findText("102"));
 	
     ui->portcb->addItem("5001");
 
@@ -94,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	
 	ui->factorycb->addItem("FC");
 	
-	ui->factorycb->setCurrentIndex(ui->factorycb->findText("M1"));
+    ui->factorycb->setCurrentIndex(ui->factorycb->findText("F8"));
 
     ui->cellinfocb->addItem("111");
     ui->cellinfocb->setCurrentIndex(ui->cellinfocb->findText("111"));
@@ -156,9 +158,11 @@ MainWindow::~MainWindow()
 *******************************************/
 void MainWindow::getRawImg()
 {
+    QTime time;
     int size;
 	uchar * data;
 	
+    time.start();
 	Mat img = this->camTh->getCapturedImg().clone();
 	
 	this->preCapturedMatImg.release();
@@ -170,10 +174,13 @@ void MainWindow::getRawImg()
 	
 	qDebug() << "[ui->net]index : " << this->curIdx << "," << res->getImgIdx(this->curIdx);
 	
-    this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx));
+    this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx), res->getImgAccuracy(this->curIdx));
 
     emit updateRawImgFin();
+    cout<<"[TIME] getRawImg sec : "<<time.second()<<" ms : "<<time.msec()<<endl;
 
+
+    cout<<"[TIME] getRawImg : "<<time.elapsed()<<endl;
 }
 
 void MainWindow::streamImg()
@@ -194,6 +201,7 @@ void MainWindow::streamImg()
 void MainWindow::on_exitButton_clicked()
 {
     this->camTh->exit();
+    this->keyTh->setLeds(false, false, false);
     this->close();
 }
 
@@ -217,12 +225,15 @@ void MainWindow::updateResource()
 
 void MainWindow::on_streamingImg_clicked()
 {
+    cout<<"streaming IMG Clicked!!!"<<endl;
+
     if (waitForResponse == false && ui->tabWidget->currentIndex() == 1)
     {
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
         this->drawImg(false,0,0,0,true);
         waitForResponse = true;
+        this->keyTh->setLeds(false, false, true);
     }
 
     /*
@@ -241,6 +252,7 @@ void MainWindow::on_matchRateSlider_sliderMoved(int position)
     QString s = QString::number(position);
     s.append("%");
     ui->currentRate->setText(s);
+    ui->updateButton->setEnabled(true);
 
     this->setImgMatchRate();
 }
@@ -303,8 +315,10 @@ void MainWindow::on_rightButton_clicked()
 
 void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result)
 {
+    QTime time;
     cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();    
 
+    time.start();
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7), 0, 0, CV_INTER_LINEAR);
     ui->preCapturedImg->resize(img.cols, img.rows);
     cv::cvtColor(img, img, CV_BGR2RGB);
@@ -312,6 +326,7 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result)
     {
         if(result == true)
         {
+            this->keyTh->setLeds(false, true, false);
             this->buzzerTh->playCaptureResultOKMelody();
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(0,255,0), 10);
 
@@ -334,6 +349,7 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result)
         }
         else
         {
+            this->keyTh->setLeds(true, false, false);
             this->buzzerTh->playWrongMelody();
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(255,0,0), 10);
         }
@@ -347,13 +363,19 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result)
     }
 
     ui->preCapturedImg->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
+
+    int elapsed = time.elapsed();
+
+    cout<<"[Time] drawImg : "<<elapsed<<endl;
 }
 void MainWindow::updateLowerUI(int indexStart)
 {
     static int preIdx = 0;
 	int idx;
     cv::Mat img;
+    QTime time;
 
+    time.start();
 	indexStart = indexStart == -1 ? preIdx : indexStart;
 	
 	this->viewIdx = indexStart;
@@ -385,6 +407,9 @@ void MainWindow::updateLowerUI(int indexStart)
     }
 	
 	preIdx = indexStart;
+
+    int elapsed = time.elapsed();
+    cout << "updateLowerUI :" << elapsed << endl;
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -397,6 +422,11 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 	if(index == 1)
 	{
 		this->netTh->userSettingFlag = true;
+        this->keyTh->setLeds(false, true, false);
+	}
+    else
+    {
+        this->keyTh->setLeds(false, false, false);
 	}
 	
 }
@@ -447,7 +477,9 @@ void MainWindow::setImgMatchRate()  // test ok
 
     // qDebug() << pos;
 
-    netTh->setImgRate(pos);
+    //netTh->setImgRate(pos);
+
+    this->res->setImgAccuracy(this->curIdx, pos);
 }
 
 void MainWindow::setProcess()   // test ok
@@ -526,11 +558,15 @@ void MainWindow::on_portcb_currentIndexChanged(const QString &arg1)
  */
 void MainWindow::updateCurIdx(int idx)
 {
+    int temp_accuracy = 0;
+
     this->curIdx = idx;
     this->viewIdx = this->curIdx;
 
     QString s = "";
+    QString ss = "";
 
+    qDebug() << this->curIdx << ":" << this->res->getSize();
     if(this->curIdx >= this->res->getSize())
     {
 
@@ -541,20 +577,34 @@ void MainWindow::updateCurIdx(int idx)
         else
         {
             s.append("OK");
+            this->buzzerTh->playFinMelody();
             this->on_ResetButton_clicked();
         }
 
         this->curIdx = this->res->getSize();
+
+        ui->currentRate->setText("0%");
+        ui->matchRateSlider->setSliderPosition(0);
+        ui->currentProcess->setText("N/A");
     }
     else
     {
         s.append("STEP ");
         s.append(QString::number(this->curIdx+1));
+        temp_accuracy = this->res->getImgAccuracy(this->curIdx);
+        ss.append(QString::number(temp_accuracy));
+        ss.append("%");
+        ui->currentRate->setText(ss);
+        ui->matchRateSlider->setSliderPosition(temp_accuracy);
+        ui->currentProcess->setText(s);
     }
 
     // QString s = "STEP ";
     // s.append(QString::number(this->curIdx+1));
     ui->curStep->setText(s);
+
+
+
 }
 
 void MainWindow::imgClickEvent(int idx)
@@ -602,5 +652,9 @@ void MainWindow::on_img4_clicked()
     imgClickEvent(4);
 }
 
+void MainWindow::on_updateButton_clicked()
+{
+    ui->updateButton->setEnabled(false);
 
-
+    emit updateDbReq();
+}

@@ -8,7 +8,13 @@ Key::Key()
     this->pollingPeriod = 1;
 
     pinMode(KeyPin, INPUT);
+    pinMode(LedRed, OUTPUT);
+    pinMode(LedGreen, OUTPUT);
+    pinMode(LedYellow, OUTPUT);
 
+    digitalWrite(LedRed, HIGH);
+    digitalWrite(LedGreen, HIGH);
+    digitalWrite(LedYellow, HIGH);
 }
 
 
@@ -46,4 +52,47 @@ void Key::run()
 
         msleep(this->pollingPeriod);
     }
+}
+
+void Key::setRed(bool onoff)
+{
+    if(onoff)
+    {
+        digitalWrite(LedRed, LOW);
+    }
+    else
+    {
+        digitalWrite(LedRed, HIGH);
+    }
+}
+
+void Key::setGreen(bool onoff)
+{
+    if(onoff)
+    {
+        digitalWrite(LedGreen, LOW);
+    }
+    else
+    {
+        digitalWrite(LedGreen, HIGH);
+    }
+}
+
+void Key::setYellow(bool onoff)
+{
+    if(onoff)
+    {
+        digitalWrite(LedYellow, LOW);
+    }
+    else
+    {
+        digitalWrite(LedYellow, HIGH);
+    }
+}
+
+void Key::setLeds(bool red, bool green, bool yellow)
+{
+    this->setRed(red);
+    this->setGreen(green);
+    this->setYellow(yellow);
 }

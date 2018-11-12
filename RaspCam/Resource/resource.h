@@ -22,17 +22,21 @@ public:
     void clear();
 
 
-    void pushData(char * data, int size, int index);
+    void pushData(char * data, int size, int index, int accuracy);
 
     cv::Mat getImgAndIdx(int idx, int * index);
     void setImg(int idx, cv::Mat img);
 
     int getImgIdx(int idx);
+    int getImgAccuracy(int idx);
+    void setImgAccuracy(int idx, int val);
     void updateImg(int idx,cv::Mat img);
 
     int getSize();
     int getIndexOf(int idx);
 
+    int getAccChangedSize(void);
+    bool getAccChangedFlag(int idx);
 
     cv::Mat getClearImg();
 
@@ -41,6 +45,8 @@ private:
 
 
     QList<int> indexs;
+    QList<int> accuracies;
+    QList<bool> accChanged;
     QList<cv::Mat> imgs;
 
 

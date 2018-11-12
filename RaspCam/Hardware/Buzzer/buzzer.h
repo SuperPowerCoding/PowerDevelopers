@@ -31,6 +31,7 @@ public:
     void playBubbleBubble();
     void playWrongMelody();
     void playCaptureMelody();
+    void playFinMelody();
 
     void playCaptureResultOKMelody();
 

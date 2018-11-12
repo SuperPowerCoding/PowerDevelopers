@@ -17,6 +17,7 @@ extern void mysql_disconnect(void);
 
 extern int getProcessSeqFromDB(const char *ordernum, const char *process);
 extern unsigned int getProcNumFromDB(const char *procnum);
+extern int updateProcAccuracyFromDB(int accuracy, int item);
 
 
 

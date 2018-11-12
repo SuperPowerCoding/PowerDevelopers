@@ -1,7 +1,10 @@
 #include <QDebug>
+#include <QTime>
 
 #include "resource.h"
 #include "../config.h"
+
+using namespace std;
 
 Resource::Resource()
 {
@@ -23,20 +26,25 @@ void Resource::clear()
 
     //qDeleteAll(this->indexs.begin(), this->indexs.end());
     this->indexs.clear();
+    this->accuracies.clear();
+    this->accChanged.clear();
 
     this->mutex.unlock();
 
 
 }
 
-void Resource::pushData(char * data, int size, int index)
+void Resource::pushData(char * data, int size, int index, int accuracy)
 {
     //std::vector<uchar> jpgbytes; // from your db
     //std::vector<char> data(buffer, buffer + size);
     //std::vector<uchar> jpgbytes(data, data + size); // from your db
+    QTime time;
 
     //cv::Mat img = cv::imdecode(jpgbytes);
     cv::Mat img;
+
+    time.start();
     if( data == NULL )
     {
 
@@ -62,8 +70,14 @@ void Resource::pushData(char * data, int size, int index)
 
     this->imgs.append(img);
     this->indexs.append(index);
+    this->accChanged.append(false);
+    this->accuracies.append(accuracy);
 
     this->mutex.unlock();
+
+    int elapsed = time.elapsed();
+
+    cout << "pushData : "<<elapsed<<endl;
 }
 
 int Resource::getSize()
@@ -164,4 +178,51 @@ int Resource::getImgIdx(int idx)
     this->mutex.unlock();
 
     return index;
+}
+
+int Resource::getImgAccuracy(int idx)
+{
+    int accuracy;
+
+    if(idx < 0) return 0;
+
+    this->mutex.lock();
+
+    if(this->accuracies.size() < idx)
+    {
+        accuracy = 0;
+    }
+    else
+    {
+        accuracy = this->accuracies.at(idx);
+    }
+
+    this->mutex.unlock();
+
+    return accuracy;
+}
+
+void Resource::setImgAccuracy(int idx, int val)
+{
+    if(idx < 0 ) return ;
+
+    this->mutex.lock();
+
+    if(this->accuracies.size() > idx )
+    {
+        this->accuracies[idx] = val;
+        this->accChanged[idx] = true;
+    }
+
+    this->mutex.unlock();
+}
+
+int Resource::getAccChangedSize(void)
+{
+    return this->accChanged.size();
+}
+
+bool Resource::getAccChangedFlag(int idx)
+{
+    return this->accChanged.at(idx);
 }

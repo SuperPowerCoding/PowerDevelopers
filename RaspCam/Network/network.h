@@ -15,7 +15,7 @@ class Network : public QThread
 public:
     Network(unsigned int msecPollingPeriod, Resource * res);
 
-    void setRawImgData(uchar * data, int size, int index, int accuracy);
+    void setRawImgData(uchar * data, int size, int index, int accuracy, int step, uchar isFinal);
 	uchar * getRawImgData(void);
 
 
@@ -29,11 +29,12 @@ public:
 		int y;
         int matchRate;
 		bool result;
+        unsigned char err_code;
 	}ipResult;    
 
     static Network *getInstance() { return &net_instance; }
 
-    void setIpResults(int x, int y,int rate, bool res);
+    void setIpResults(int x, int y,int rate, bool res, unsigned char err_code);
 
     // user setting
     // ip address
@@ -55,7 +56,7 @@ public:
     void setImgRate(int rate);
     int getImgRate(void);
     Resource * res;
-	
+
 	bool resetFlag;
 	bool userSettingFlag;
 
@@ -80,6 +81,8 @@ private:
 	int rawDataImgSize;
     int rawDataIndex;
     int rawDataAccuracy;
+    int step;
+    unsigned char isFinal;
 
     static Network net_instance;    
 	

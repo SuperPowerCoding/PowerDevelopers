@@ -58,6 +58,7 @@ public:
     QWidget *verticalLayoutWidget;
     QVBoxLayout *verticalLayout;
     QLabel *preCapturedImg;
+    QLabel *errCode;
     QWidget *horizontalLayoutWidget;
     QHBoxLayout *capturedImgLayout;
     QPushButton *img0;
@@ -260,6 +261,12 @@ public:
 
         verticalLayout->addWidget(preCapturedImg);
 
+        errCode = new QLabel(verticalLayoutWidget);
+        errCode->setObjectName(QStringLiteral("errCode"));
+        errCode->setAlignment(Qt::AlignCenter);
+
+        verticalLayout->addWidget(errCode);
+
         horizontalLayoutWidget = new QWidget(CameraTab);
         horizontalLayoutWidget->setObjectName(QStringLiteral("horizontalLayoutWidget"));
         horizontalLayoutWidget->setGeometry(QRect(60, 210, 371, 66));
@@ -367,7 +374,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -391,6 +398,7 @@ public:
         updateButton->setText(QApplication::translate("MainWindow", "DB Update", Q_NULLPTR));
         tabWidget->setTabText(tabWidget->indexOf(SettingTab), QApplication::translate("MainWindow", "Settings", Q_NULLPTR));
         preCapturedImg->setText(QString());
+        errCode->setText(QString());
         img0->setText(QString());
         img1->setText(QString());
         img2->setText(QString());

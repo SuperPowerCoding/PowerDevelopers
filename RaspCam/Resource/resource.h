@@ -37,6 +37,8 @@ public:
 
     int getAccChangedSize(void);
     bool getAccChangedFlag(int idx);
+    int getStepNum(int idx);
+    uchar getIsFinal(int idx);
 
     cv::Mat getClearImg();
 

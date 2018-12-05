@@ -16,6 +16,12 @@ class MainWindow;
 
 
 #define MAX_CAPURES  5
+#define ERR_NONE                0
+#define ERR_ITEM_REMAINED       1
+#define ERR_ALREADY_REGISTERED  2
+#define ERR_PRE_SEQ_FAIL        3
+#define ERR_UNKNOWN              4
+
 
 class MainWindow : public QMainWindow
 {
@@ -87,7 +93,7 @@ private:
 
     void updateCurIdx(int idx);
 
-    void drawImg(bool draw, int x, int y,int matchRate, bool result);
+    void drawImg(bool draw, int x, int y,int matchRate, bool result, uchar errcode);
 
     void updateLowerUI(int startIdx);
 

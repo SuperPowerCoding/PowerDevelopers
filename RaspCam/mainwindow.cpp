@@ -98,8 +98,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	
     ui->factorycb->setCurrentIndex(ui->factorycb->findText("F8"));
 
-    ui->cellinfocb->addItem("111");
-    ui->cellinfocb->setCurrentIndex(ui->cellinfocb->findText("111"));
+    ui->cellinfocb->addItem("501");
+    ui->cellinfocb->addItem("502");
+    ui->cellinfocb->setCurrentIndex(ui->cellinfocb->findText("501"));
 	
     // setting
     ui->tabWidget->setCurrentIndex(0);
@@ -174,7 +175,7 @@ void MainWindow::getRawImg()
 	
 	qDebug() << "[ui->net]index : " << this->curIdx << "," << res->getImgIdx(this->curIdx);
 	
-    this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx), res->getImgAccuracy(this->curIdx));
+    this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx), res->getImgAccuracy(this->curIdx), res->getStepNum(this->curIdx), res->getIsFinal(this->curIdx));
 
     emit updateRawImgFin();
     cout<<"[TIME] getRawImg sec : "<<time.second()<<" ms : "<<time.msec()<<endl;
@@ -211,7 +212,7 @@ void MainWindow::updateIPResult()
 	// show result data
     qDebug() << "result";
     waitForResponse = false;
-    this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.matchRate,this->netTh->ipResult.result);
+    this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.matchRate,this->netTh->ipResult.result, this->netTh->ipResult.err_code);
 }
 
 
@@ -231,7 +232,7 @@ void MainWindow::on_streamingImg_clicked()
     {
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
-        this->drawImg(false,0,0,0,true);
+        this->drawImg(false,0,0,0,true,0);
         waitForResponse = true;
         this->keyTh->setLeds(false, false, true);
     }
@@ -313,10 +314,10 @@ void MainWindow::on_rightButton_clicked()
 }
 
 
-void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result)
+void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uchar errCode)
 {
     QTime time;
-    cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();    
+    cv::Mat img = this->preCapturedMatImg; //this->camTh->getCapturedImg();
 
     time.start();
     cv::resize(img, img, Size(D_CAMERA_DISPLAYED_WIDTH*4/7, D_CAMERA_DISPLAYED_HEIGHT*4/7), 0, 0, CV_INTER_LINEAR);
@@ -360,6 +361,36 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result)
         rate = QString::number(matchRate);
         rate.append("%");
         this->ui->matchRateResult->setText(rate);
+
+        switch(errCode)
+        {
+        case 0:
+            if(result == true)
+            {
+                this->ui->errCode->setText("Success.");
+            }
+            else
+            {
+                this->ui->errCode->setText("Failed.");
+            }
+            break;
+        case 1:
+            this->ui->errCode->setText("Item Remained.");
+            break;
+
+        case 2:
+            this->ui->errCode->setText("Already Registered.");
+            break;
+
+        case 3:
+            this->ui->errCode->setText("PreSeq Fail.");
+            break;
+
+        case 4:
+        default:
+            this->ui->errCode->setText("Unkown Error.");
+            break;
+        }
     }
 
     ui->preCapturedImg->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));

@@ -17,7 +17,7 @@
 
 using namespace std;
 
-#define D_HEADER_SIZE 11
+#define D_HEADER_SIZE 13
 #define D_MAX_PROC_SEQ 255
 #define D_MAX_ORD_NUM 10
 #define D_MAX_RESP_NUM 128
@@ -31,10 +31,13 @@ typedef struct transPackinfo {
 	unsigned char cell_num;
 	unsigned char process_num;
 	unsigned char accuracy;
+    unsigned char step;
+    unsigned char isFinal;
 	unsigned char order_size;
     char          order_num[D_MAX_RESP_NUM];
 	unsigned int  image_size;
 	char          *image_data;
+
 
 }packInfo_tx;
 
@@ -47,6 +50,7 @@ typedef struct revPackinfo {
 	unsigned int coordinate_x;
 	unsigned int coordinate_y;
 	unsigned char matching_rate;
+    unsigned char err_code;
 	unsigned char data_size;
     char          data[D_MAX_RESP_NUM];
 
@@ -130,7 +134,7 @@ typedef struct jobinfo
 extern bool setSendRequest(packInfo_tx *sInfo);
 extern void getDevOrderNumber(char *num);
 extern int buildPacket(packInfo_tx *info);
-extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, int accuracy);
+extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, int accuracy, int step, unsigned char isFinal);
 //extern int transfer_proc_init(void);
 //extern int transfer_data_proc(void);
 //extern void setNetworkHandler(Network* net);

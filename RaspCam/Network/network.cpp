@@ -9,7 +9,7 @@
 extern void setNetworkHandler(Network* net);
 extern int transfer_proc_init(void);
 extern int transfer_data_proc(void);
-extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx);
+extern int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, int step, uchar isFinal);
 extern int notifyNumOfProcessSeq(char *PS, unsigned int *cnt);
 extern int updateProcAccuracyFromDB(int accuracy, int item);
 extern int mysql_connect(void);
@@ -61,12 +61,14 @@ void Network::run()
 
 }
 
-void Network::setRawImgData(uchar * data, int size, int index, int accuracy)
+void Network::setRawImgData(uchar * data, int size, int index, int accuracy, int step, uchar isFinal)
 {
     this->rawDataImg = data;
     this->rawDataImgSize = size;
     this->rawDataIndex = index;
     this->rawDataAccuracy = accuracy;
+    this->step = step;
+    this->isFinal = isFinal;
 }
 
 uchar * Network::getRawImgData(void)
@@ -94,17 +96,18 @@ void Network::sendRawImgData()
 
    int idx =this->rawDataIndex;
    int accuracy = this->rawDataAccuracy;
-   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx, accuracy); //index will be switched by step .
+   requestAnalysisToServer((char*)this->rawDataImg, this->rawDataImgSize, idx, accuracy, this->step, this->isFinal); //index will be switched by step .
 }
 
-void Network::setIpResults(int x, int y,int rate, bool res)
+void Network::setIpResults(int x, int y,int rate, bool res, unsigned char err_code)
 {
 
     printf("network::setIpResults\n");
     this->ipResult.x = x;
     this->ipResult.y = y;
     this->ipResult.matchRate = rate;
-    this->ipResult.result = res;  
+    this->ipResult.result = res;
+    this->ipResult.err_code = err_code;
 }
 
 

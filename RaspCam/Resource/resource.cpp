@@ -226,3 +226,46 @@ bool Resource::getAccChangedFlag(int idx)
 {
     return this->accChanged.at(idx);
 }
+
+int Resource::getStepNum(int idx)
+{
+    int step = 0;
+
+    if(idx < 0 ) return 0;
+
+    this->mutex.lock();
+
+    if(this->indexs.size() > 0 )
+    {
+        step = idx+1;
+    }
+    else
+    {
+        step = 0;
+    }
+
+    this->mutex.unlock();
+
+    return step;
+}
+
+uchar Resource::getIsFinal(int idx)
+{
+    uchar ret = 0;
+
+    if(idx < 0) return 0;
+
+    this->mutex.lock();
+
+    if(this->indexs.size() > 0 )
+    {
+        if(this->indexs.size() == idx+1)
+        {
+            ret = 1;
+        }
+    }
+
+    this->mutex.unlock();
+
+    return ret;
+}

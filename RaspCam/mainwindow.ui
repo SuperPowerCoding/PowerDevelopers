@@ -96,7 +96,7 @@
      </font>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="SettingTab">
      <attribute name="title">
@@ -836,6 +836,16 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QLabel" name="errCode">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="horizontalLayoutWidget">
@@ -1004,7 +1014,7 @@
        </size>
       </property>
       <property name="text">
-       <string>?€</string>
+       <string>¢¸</string>
       </property>
      </widget>
      <widget class="QPushButton" name="rightButton">
@@ -1023,7 +1033,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>??/string>
+       <string>¢º</string>
       </property>
      </widget>
      <widget class="QPushButton" name="streamingImg">

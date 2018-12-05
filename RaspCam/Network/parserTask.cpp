@@ -173,7 +173,7 @@ Network* getNetworkHandler(void)
 int receiveFunc(char *data)
 {
     QTime time;
-	bool ret;
+    bool ret;
 	cout << "[call]" << __FUNCTION__ <<endl;
     time.start();
 
@@ -195,6 +195,8 @@ int receiveFunc(char *data)
 	printf("info->process_num: %x\n", info->process_num);
 	printf("info->coord_x: %d\n", info->coordinate_x);
 	printf("info->coord_y: %d\n", info->coordinate_y);
+    printf("info->matching_rate: %d\n", info->matching_rate);
+    printf("info->err_code: %d\n", info->err_code);
 	printf("info->data_size: %d\n", info->data_size);    
     printf("info->data: %s\n", info->data);
     printf("__________________________\n");
@@ -219,7 +221,7 @@ int receiveFunc(char *data)
                 setProcSequence();
 			}
 			/* do something * */            
-            netHander->setIpResults(200, 300,info->matching_rate, 1);
+            netHander->setIpResults(info->coordinate_x, info->coordinate_y,info->matching_rate, 1, info->err_code);
 
             deleteJob(currentJobData);
 		}
@@ -227,7 +229,7 @@ int receiveFunc(char *data)
 	else if(info->cmd_type == CMD_TYPE_NACK)
 	{
 		cout <<"received Error from server." <<endl;
-        netHander->setIpResults(200, 300,info->matching_rate, 0);
+        netHander->setIpResults(info->coordinate_x, info->coordinate_y,info->matching_rate, 0, info->err_code);
 
         deleteJob(currentJobData);
 	}
@@ -256,7 +258,7 @@ int buildPacket(packInfo_tx *info)
 {
     QTime time;
     time.start();
-	int buf_size = info->image_size+info->order_size+D_HEADER_SIZE;
+    int buf_size = info->image_size+info->order_size+D_HEADER_SIZE;
 	char *rq_data = (char*)malloc(sizeof(char)*buf_size);
 	memset(rq_data, 0, sizeof(char)*buf_size);
 	printf("buildPack: totalSize: %d\n", buf_size);
@@ -267,9 +269,11 @@ int buildPacket(packInfo_tx *info)
 	rq_data[3] = info->cell_num;
 	rq_data[4] = info->process_num;
 	rq_data[5] = info->accuracy;
-	rq_data[6] = info->order_size;
-	memcpy(&rq_data[7], info->order_num, info->order_size);
-	memcpy(&rq_data[7+info->order_size], &info->image_size, sizeof(unsigned int));
+    rq_data[6] = info->step;
+    rq_data[7] = info->isFinal;
+    rq_data[8] = info->order_size;
+    memcpy(&rq_data[9], info->order_num, info->order_size);
+    memcpy(&rq_data[9+info->order_size], &info->image_size, sizeof(unsigned int));
 	memcpy(&rq_data[D_HEADER_SIZE+info->order_size], \
 										info->image_data, info->image_size);
 
@@ -278,6 +282,8 @@ int buildPacket(packInfo_tx *info)
 	printf("action: %d\n", info->action_type);
     printf("item id: %d\n", info->item_id);
 	printf("size: %d\n", info->image_size);
+    printf("step: %d\n", info->step);
+    printf("isFinal: %d\n", info->isFinal);
     printf("--------------------------\n");
 
     jobInfo_t *newJob = (jobInfo_t *)malloc(sizeof(jobInfo_t));	
@@ -297,7 +303,7 @@ int appendJob(jobInfo_t *job)
 {
     QTime time;
     time.start();
-	cout << "[push] new job" << endl;
+    cout << "[push] new job" << endl;
 	//unique_lockMedics mlock(mutex_);
 	job_list.push((jobInfo_t*)job);
 	//mlock.unlock();     // unlock before notificiation to minimize mutex contention
@@ -330,9 +336,10 @@ bool parsePacket(packInfo_rx *info, char *data)
 		memcpy(&info->coordinate_x, &rs_data[5], sizeof(char)*4);
 		memcpy(&info->coordinate_y, &rs_data[9], sizeof(char)*4);
 		info->matching_rate = rs_data[13];
-		info->data_size = rs_data[14];
+        info->err_code = rs_data[14];
+        info->data_size = rs_data[15];
         if(info->data_size > 0)
-            memcpy(info->data, &rs_data[15], sizeof(char)*info->data_size);
+            memcpy(info->data, &rs_data[16], sizeof(char)*info->data_size);
 	}
     else
     {
@@ -557,7 +564,7 @@ int findWorkIdentity(unsigned char idx, char *act_type, char *item_id)
 
 }
 
-int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, int accuracy)
+int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, int accuracy, int step, uchar isFinal)
 {
     QTime time;
     printf("requestAnalysisToServer: %d /JobState: %d\n", idx, State);
@@ -593,6 +600,8 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, i
         pack->order_size = 0;  //will have to make it from pack
         pack->image_size = size;
         pack->image_data = (char*)image;
+        pack->step = 0;
+        pack->isFinal = isFinal;
         buildPacket(pack);
     }
     else if(State >= JS_READY)
@@ -616,6 +625,8 @@ int requestAnalysisToServer(char *image, unsigned int size, unsigned char idx, i
                 strncpy(pack->order_num, full_order_num, pack->order_size);
                 pack->image_size = size;
                 pack->image_data = (char*)image;
+                pack->step = (unsigned char)step;
+                pack->isFinal = isFinal;
 
                 printf("%p\n", pack);
                 buildPacket(pack);

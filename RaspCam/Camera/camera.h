@@ -20,40 +20,54 @@ class Camera : public QThread
     Q_OBJECT
 
 public:
+    /* constructor */
     Camera(unsigned int msecPollingPeriod, unsigned int width, unsigned int height);
-    void setPollingPeriod(unsigned int msec);
-    void exit();
-    bool isEnable();
-    void setCameraSize(unsigned int width, unsigned int height);
+
+
     bool initCamera(unsigned int width, unsigned int height);
+
+    /* set method */
+    void setPollingPeriod(unsigned int msec);
+    void setCameraSize(unsigned int width, unsigned int height);
+
+    /* get method */
     cv::Mat getCapturedImg();
     uchar * getCapturedRawImg(int * size);
 
+
+    void exit();                    // When you call this function, the camera thread will be dead.
+    bool isEnable();
+    
+    /* enable camera */
     void enableStreaming(bool enable);
 
-	uchar * Mat2RawData(Mat image, int * size);
-
+    /* img process */
+    uchar * Mat2RawData(Mat image, int * size); // open cv Mat to uchar converter
 
 private:
-    unsigned int pollingPeriod;
-    bool _exit;
-    bool _enabled;
+    /* private members */
+    // basic task members
+    unsigned int pollingPeriod;     // task sleep ms    
+    bool _exit;                     // if _exit = true -> thread will be dead
+    bool _enabled;                  // enable streaming
+    
+    // camera
+    raspicam::RaspiCam_Cv cam;      // control raspicam
+    
+    // image
+    cv::Mat capturedImg;            // captured img
+    QMutex captuerImgMutex;         // mutex for critical section for capturedImg
 
-
-
+    // task 
     void run();
-    raspicam::RaspiCam_Cv cam;
-    cv::Mat capturedImg;
-    QMutex captuerImgMutex;
 
     void updateImg(cv::Mat img);
     void close();
 
+    
 
 signals:
-    void captureImg();
-
-
+    void captureImg();              // image capture event
 };
 
 #endif // CAMERA_H

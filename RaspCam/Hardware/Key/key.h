@@ -6,21 +6,25 @@
 #include <QObject>
 
 #include <wiringPi.h>
+#include "../hardware.h"
 
-
-#define KeyPin  2
-#define LedGreen    23
-#define LedYellow   24
-#define LedRed	    25
 
 class Key : public QThread
 {
     Q_OBJECT
 
 public:
+    /***************************
+    * constructor & destructor
+    ****************************/
     Key();
 
     bool isEnabled();
+    void setEnable(bool en);
+
+    /***************************
+    * led control method
+    ****************************/
     void setRed(bool onoff);
     void setGreen(bool onoff);
     void setYellow(bool onoff);
@@ -28,13 +32,13 @@ public:
 
 private:
     unsigned int pollingPeriod;
-    bool _exit;
     bool _enabled;
     void run();
 
     void close();
 
 signals:
+    /* key pressed event */
     void keyPressed();
 };
 

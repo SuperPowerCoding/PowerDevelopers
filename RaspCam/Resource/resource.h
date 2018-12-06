@@ -16,23 +16,40 @@ class Resource
     // Q_OBJECT
 
 public:
+    /*******************************
+     *  constructor & destructor     
+     *******************************/
     Resource();
     ~Resource();
 
-    void clear();
-
-
+    // push data to resource
     void pushData(char * data, int size, int index, int accuracy);
 
+    // data all clear    
+    void clear();
+    
+    // get image and index
     cv::Mat getImgAndIdx(int idx, int * index);
+    
+    // set image at idx
     void setImg(int idx, cv::Mat img);
 
+    // get image index at idx
     int getImgIdx(int idx);
-    int getImgAccuracy(int idx);
-    void setImgAccuracy(int idx, int val);
-    void updateImg(int idx,cv::Mat img);
 
+    // get image accuracy at idx
+    int getImgAccuracy(int idx);
+
+    // set image accracy at idx
+    void setImgAccuracy(int idx, int val);
+
+    // duplicated
+    // void updateImg(int idx,cv::Mat img);
+
+    // get total resource size
     int getSize();
+
+    // find list index that have image idx
     int getIndexOf(int idx);
 
     int getAccChangedSize(void);

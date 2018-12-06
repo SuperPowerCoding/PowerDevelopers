@@ -33,7 +33,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = RaspCam1.0.0
-DISTDIR = /home/pi/src/Prj/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
+DISTDIR = /home/pi/src/Prj/feature/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1
 LIBS          = $(SUBLIBS) -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev -L/usr/lib/arm-linux-gnueabihf -lmysqlclient -lQt5Widgets -lQt5Gui -lQt5Core -lGLESv2 -lpthread 
@@ -57,11 +57,15 @@ SOURCES       = main.cpp \
 		Hardware/Buzzer/buzzer.cpp \
 		Hardware/Key/key.cpp \
 		Resource/resource.cpp \
-		Network/parsemysql.cpp moc_mainwindow.cpp \
+		Network/parsemysql.cpp \
+		Hardware/LaserSensor/laserSensor.cpp \
+		Hardware/VibrationMotor/vibMotor.cpp moc_mainwindow.cpp \
 		moc_camera.cpp \
 		moc_network.cpp \
 		moc_buzzer.cpp \
-		moc_key.cpp
+		moc_key.cpp \
+		moc_laserSensor.cpp \
+		moc_vibMotor.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		camera.o \
@@ -72,11 +76,21 @@ OBJECTS       = main.o \
 		key.o \
 		resource.o \
 		parsemysql.o \
+		laserSensor.o \
+		vl53l0x_api.o \
+		vl53l0x_api_calibration.o \
+		vl53l0x_api_core.o \
+		vl53l0x_api_ranging.o \
+		vl53l0x_api_strings.o \
+		vl53l0x_platform.o \
+		vibMotor.o \
 		moc_mainwindow.o \
 		moc_camera.o \
 		moc_network.o \
 		moc_buzzer.o \
-		moc_key.o
+		moc_key.o \
+		moc_laserSensor.o \
+		moc_vibMotor.o
 DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/unix.conf \
 		/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/common/linux.conf \
@@ -157,7 +171,22 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		Hardware/Buzzer/melody.h \
 		Hardware/Key/key.h \
 		Resource/resource.h \
-		Network/parsemysql.h main.cpp \
+		Network/parsemysql.h \
+		Hardware/hardware.h \
+		Hardware/LaserSensor/inc/vl53l0x_api.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_calibration.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_core.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_ranging.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_strings.h \
+		Hardware/LaserSensor/inc/vl53l0x_def.h \
+		Hardware/LaserSensor/inc/vl53l0x_device.h \
+		Hardware/LaserSensor/inc/vl53l0x_interrupt_threshold_settings.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform_log.h \
+		Hardware/LaserSensor/inc/vl53l0x_tuning.h \
+		Hardware/LaserSensor/inc/vl53l0x_types.h \
+		Hardware/LaserSensor/laserSensor.h \
+		Hardware/VibrationMotor/vibMotor.h main.cpp \
 		mainwindow.cpp \
 		Camera/camera.cpp \
 		Network/network.cpp \
@@ -166,7 +195,9 @@ DIST          = /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
 		Hardware/Buzzer/buzzer.cpp \
 		Hardware/Key/key.cpp \
 		Resource/resource.cpp \
-		Network/parsemysql.cpp
+		Network/parsemysql.cpp \
+		Hardware/LaserSensor/laserSensor.cpp \
+		Hardware/VibrationMotor/vibMotor.cpp
 QMAKE_TARGET  = RaspCam
 DESTDIR       = 
 TARGET        = RaspCam
@@ -339,8 +370,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h Network/network.h Hardware/Buzzer/buzzer.h Network/parserInfo.h Network/tcp_sock.h Hardware/Buzzer/tones.h Hardware/Buzzer/melody.h Hardware/Key/key.h Resource/resource.h Network/parsemysql.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp Camera/camera.cpp Network/network.cpp Network/parserTask.cpp Network/tcp_sock.cpp Hardware/Buzzer/buzzer.cpp Hardware/Key/key.cpp Resource/resource.cpp Network/parsemysql.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h Camera/camera.h config.h Network/network.h Hardware/Buzzer/buzzer.h Network/parserInfo.h Network/tcp_sock.h Hardware/Buzzer/tones.h Hardware/Buzzer/melody.h Hardware/Key/key.h Resource/resource.h Network/parsemysql.h Hardware/hardware.h Hardware/LaserSensor/inc/vl53l0x_api.h Hardware/LaserSensor/inc/vl53l0x_api_calibration.h Hardware/LaserSensor/inc/vl53l0x_api_core.h Hardware/LaserSensor/inc/vl53l0x_api_ranging.h Hardware/LaserSensor/inc/vl53l0x_api_strings.h Hardware/LaserSensor/inc/vl53l0x_def.h Hardware/LaserSensor/inc/vl53l0x_device.h Hardware/LaserSensor/inc/vl53l0x_interrupt_threshold_settings.h Hardware/LaserSensor/inc/vl53l0x_platform.h Hardware/LaserSensor/inc/vl53l0x_platform_log.h Hardware/LaserSensor/inc/vl53l0x_tuning.h Hardware/LaserSensor/inc/vl53l0x_types.h Hardware/LaserSensor/laserSensor.h Hardware/VibrationMotor/vibMotor.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mainwindow.cpp Camera/camera.cpp Network/network.cpp Network/parserTask.cpp Network/tcp_sock.cpp Hardware/Buzzer/buzzer.cpp Hardware/Key/key.cpp Resource/resource.cpp Network/parsemysql.cpp Hardware/LaserSensor/laserSensor.cpp Hardware/VibrationMotor/vibMotor.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mainwindow.ui $(DISTDIR)/
 
 
@@ -367,39 +398,68 @@ benchmark: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp moc_network.cpp moc_buzzer.cpp moc_key.cpp
+compiler_moc_header_make_all: moc_mainwindow.cpp moc_camera.cpp moc_network.cpp moc_buzzer.cpp moc_key.cpp moc_laserSensor.cpp moc_vibMotor.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp moc_network.cpp moc_buzzer.cpp moc_key.cpp
+	-$(DEL_FILE) moc_mainwindow.cpp moc_camera.cpp moc_network.cpp moc_buzzer.cpp moc_key.cpp moc_laserSensor.cpp moc_vibMotor.cpp
 moc_mainwindow.cpp: Camera/camera.h \
 		config.h \
 		Network/network.h \
 		Resource/resource.h \
 		Hardware/Buzzer/buzzer.h \
 		Hardware/Buzzer/tones.h \
+		Hardware/hardware.h \
 		Hardware/Key/key.h \
+		Hardware/LaserSensor/laserSensor.h \
+		Hardware/LaserSensor/inc/vl53l0x_api.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_strings.h \
+		Hardware/LaserSensor/inc/vl53l0x_def.h \
+		Hardware/LaserSensor/inc/vl53l0x_device.h \
+		Hardware/LaserSensor/inc/vl53l0x_types.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform_log.h \
+		Hardware/VibrationMotor/vibMotor.h \
 		mainwindow.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
 moc_camera.cpp: config.h \
 		Camera/camera.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
 
 moc_network.cpp: config.h \
 		Resource/resource.h \
 		Network/network.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
 
 moc_buzzer.cpp: Hardware/Buzzer/tones.h \
+		Hardware/hardware.h \
 		Hardware/Buzzer/buzzer.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Buzzer/buzzer.h -o moc_buzzer.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Buzzer/buzzer.h -o moc_buzzer.cpp
 
-moc_key.cpp: Hardware/Key/key.h \
+moc_key.cpp: Hardware/hardware.h \
+		Hardware/Key/key.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Key/key.h -o moc_key.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Key/key.h -o moc_key.cpp
+
+moc_laserSensor.cpp: Hardware/hardware.h \
+		Hardware/LaserSensor/inc/vl53l0x_api.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_strings.h \
+		Hardware/LaserSensor/inc/vl53l0x_def.h \
+		Hardware/LaserSensor/inc/vl53l0x_device.h \
+		Hardware/LaserSensor/inc/vl53l0x_types.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform_log.h \
+		Hardware/LaserSensor/laserSensor.h \
+		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/LaserSensor/laserSensor.h -o moc_laserSensor.cpp
+
+moc_vibMotor.cpp: Hardware/hardware.h \
+		Hardware/VibrationMotor/vibMotor.h \
+		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/VibrationMotor/vibMotor.h -o moc_vibMotor.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -427,7 +487,17 @@ main.o: main.cpp mainwindow.h \
 		Resource/resource.h \
 		Hardware/Buzzer/buzzer.h \
 		Hardware/Buzzer/tones.h \
-		Hardware/Key/key.h
+		Hardware/hardware.h \
+		Hardware/Key/key.h \
+		Hardware/LaserSensor/laserSensor.h \
+		Hardware/LaserSensor/inc/vl53l0x_api.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_strings.h \
+		Hardware/LaserSensor/inc/vl53l0x_def.h \
+		Hardware/LaserSensor/inc/vl53l0x_device.h \
+		Hardware/LaserSensor/inc/vl53l0x_types.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform_log.h \
+		Hardware/VibrationMotor/vibMotor.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mainwindow.o: mainwindow.cpp mainwindow.h \
@@ -437,7 +507,17 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		Resource/resource.h \
 		Hardware/Buzzer/buzzer.h \
 		Hardware/Buzzer/tones.h \
+		Hardware/hardware.h \
 		Hardware/Key/key.h \
+		Hardware/LaserSensor/laserSensor.h \
+		Hardware/LaserSensor/inc/vl53l0x_api.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_strings.h \
+		Hardware/LaserSensor/inc/vl53l0x_def.h \
+		Hardware/LaserSensor/inc/vl53l0x_device.h \
+		Hardware/LaserSensor/inc/vl53l0x_types.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform_log.h \
+		Hardware/VibrationMotor/vibMotor.h \
 		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o mainwindow.cpp
 
@@ -466,19 +546,39 @@ tcp_sock.o: Network/tcp_sock.cpp Network/tcp_sock.h \
 
 buzzer.o: Hardware/Buzzer/buzzer.cpp Hardware/Buzzer/buzzer.h \
 		Hardware/Buzzer/tones.h \
+		Hardware/hardware.h \
 		Hardware/Buzzer/melody.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o buzzer.o Hardware/Buzzer/buzzer.cpp
 
-key.o: Hardware/Key/key.cpp Hardware/Key/key.h
+key.o: Hardware/Key/key.cpp Hardware/Key/key.h \
+		Hardware/hardware.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o key.o Hardware/Key/key.cpp
 
 resource.o: Resource/resource.cpp Resource/resource.h \
 		config.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o resource.o Resource/resource.cpp
 
-parsemysql.o: Network/parsemysql.cpp Network/parsemysql.h \
+parsemysql.o: Network/parsemysql.cpp Network/network.h \
+		config.h \
+		Resource/resource.h \
+		Network/parsemysql.h \
 		Network/parserInfo.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o parsemysql.o Network/parsemysql.cpp
+
+laserSensor.o: Hardware/LaserSensor/laserSensor.cpp Hardware/LaserSensor/laserSensor.h \
+		Hardware/hardware.h \
+		Hardware/LaserSensor/inc/vl53l0x_api.h \
+		Hardware/LaserSensor/inc/vl53l0x_api_strings.h \
+		Hardware/LaserSensor/inc/vl53l0x_def.h \
+		Hardware/LaserSensor/inc/vl53l0x_device.h \
+		Hardware/LaserSensor/inc/vl53l0x_types.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform.h \
+		Hardware/LaserSensor/inc/vl53l0x_platform_log.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o laserSensor.o Hardware/LaserSensor/laserSensor.cpp
+
+vibMotor.o: Hardware/VibrationMotor/vibMotor.cpp Hardware/VibrationMotor/vibMotor.h \
+		Hardware/hardware.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o vibMotor.o Hardware/VibrationMotor/vibMotor.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
@@ -494,6 +594,12 @@ moc_buzzer.o: moc_buzzer.cpp
 
 moc_key.o: moc_key.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_key.o moc_key.cpp
+
+moc_laserSensor.o: moc_laserSensor.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_laserSensor.o moc_laserSensor.cpp
+
+moc_vibMotor.o: moc_vibMotor.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_vibMotor.o moc_vibMotor.cpp
 
 ####### Install
 

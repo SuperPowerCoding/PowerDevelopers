@@ -4,11 +4,21 @@
 #include <QMainWindow>
 #include <QPushButton>
 
+// basic module headers
 #include "Camera/camera.h"
 #include "Network/network.h"
+#include "Resource/resource.h"
+
+/*
+    optional module headers
+    To turn off module, set enable define 1 to 0 in "Hardware/hardware.h"
+    Extra codes are not required when enable define chnaged.
+*/ 
 #include "Hardware/Buzzer/buzzer.h"
 #include "Hardware/Key/key.h"
-#include "Resource/resource.h"
+#include "Hardware/LaserSensor/laserSensor.h"
+#include "Hardware/VibrationMotor/vibMotor.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -33,28 +43,51 @@ public:
 
 
 private slots:
-    void on_exitButton_clicked();
 
-
-
-    void streamImg();
-
-    void getRawImg();
-
-    void on_matchRateSlider_sliderMoved(int position);
-	
-	void updateIPResult();
 
     void updateResource();
+    /**************************
+    *   network events
+    ***************************/    
+    void updateIPResult();
 
+    /**************************
+    *   image events
+    ***************************/    
+    // image stream
+    void streamImg();
+    void getRawImg();
+
+    /**************************
+    *   external Hardware module events
+    ***************************/    
     // external button
-    void on_externalButton_pressed();
+    void on_externalButton_pressed();    
 
+
+    /**************************
+    *   ui events
+    ***************************/
+    void on_matchRateSlider_sliderMoved(int position);
+	    
+    /* buttons events */
     void on_ResetButton_clicked();
-
     void on_leftButton_clicked();
     void on_rightButton_clicked();
+    void on_exitButton_clicked();   
+    
+    // capture!!
+    void on_streamingImg_clicked();
 
+    // lower ui clicked
+    void on_img0_clicked();
+    void on_img1_clicked();
+    void on_img2_clicked();
+    void on_img3_clicked();
+    void on_img4_clicked();
+
+
+    /* setting events */    
     // tab changed
     void on_tabWidget_currentChanged(int index);
 
@@ -70,50 +103,55 @@ private slots:
     // port changed
     void on_portcb_currentIndexChanged(const QString &arg1);
 
-    // capture!!
-    void on_streamingImg_clicked();
-
-    // lower ui clicked
-    void on_img0_clicked();
-    void on_img1_clicked();
-    void on_img2_clicked();
-    void on_img3_clicked();
-    void on_img4_clicked();
-
+    // cell info
     void on_cellinfocb_currentTextChanged(const QString &arg1);
 
     void on_updateButton_clicked();
 
 private:
+
     Ui::MainWindow *ui;
-    Camera * camTh = NULL;
-    Network * netTh= NULL;
-    Buzzer * buzzerTh= NULL;
-    Key * keyTh = NULL;
+    /*********************************
+    *   modules
+    **********************************/
+    // basic module
+    Resource * res;                // resource
+    Camera * camTh = NULL;          // camera module
+    Network * netTh= NULL;          // network module
+    
+    // for optional 
+    // To turn off module, set enable define value 1 to 0 in hardware.h
+    Buzzer * buzzerTh= NULL;        // buzzer module for sound.
+    Key * keyTh = NULL;             // key module for button & leds
+    LaserSensor * laserTh = NULL;   // laser distance sensor for automatic camera shutter.
+    VibMotor * vibTh = NULL;        // vibration motor module for vibaration
 
-    void updateCurIdx(int idx);
+    
 
-    void drawImg(bool draw, int x, int y,int matchRate, bool result, uchar errcode);
-
-    void updateLowerUI(int startIdx);
-
-    QPoint m_down;
-    QPoint m_up;
-
-    Resource * res;
+//   QPoint m_down;
+//   QPoint m_up;
+   /*********************************
+    *   modules
+    **********************************/
 	cv::Mat preCapturedMatImg;
-
-
-    int curIdx;
-    int maxIdx;
+    bool waitForResponse;           // preventing duplicated capture.
+    bool resourceFin;               // flag for updating resource finished
+    
+    /*********************************
+    *   lower ui
+    **********************************/
+    // lower image
+    QPushButton * capturedImg[D_UI_NUMBER_OF_LOWER_UI_IMGS];    
+    int index[D_UI_NUMBER_OF_LOWER_UI_IMGS];                    // real index of image ex) 201, 203 ....
+    int curIdx;                                                 // current index
+    // int maxIdx;
     int viewIdx;
 
-    QPushButton * capturedImg[D_UI_NUMBER_OF_LOWER_UI_IMGS];
-    // Mat img[D_UI_NUMBER_OF_LOWER_UI_IMGS];
-    int index[D_UI_NUMBER_OF_LOWER_UI_IMGS];
+    
 
-    bool resourceFin;
-
+    /*********************************
+    *   set method
+    **********************************/
     void setIpAddress();
     QString IP;
     QByteArray tempQs; //temp data for QString -> char*
@@ -127,10 +165,17 @@ private:
     void setPort();
     void setImgMatchRate();
 
+    /*********************************
+    *   draw image method
+    **********************************/
+    void updateCurIdx(int idx);
+
+    void drawImg(bool draw, int x, int y,int matchRate, bool result, uchar errcode);
+
+    void updateLowerUI(int startIdx);
 
     void imgClickEvent(int idx);
-
-    bool waitForResponse;
+    
 
 signals :
     void updateRawImgFin();

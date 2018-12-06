@@ -2,8 +2,8 @@
 #define CONFIG_H
 
 // Window Size
-#define D_FRAME_WIDTH	  480
-#define D_FRAME_HEIGHT	320
+#define D_FRAME_WIDTH	    480
+#define D_FRAME_HEIGHT	    320
 
 // the size of picture captured
 #define D_CAMEARA_CAPTURE_WIDTH     1024

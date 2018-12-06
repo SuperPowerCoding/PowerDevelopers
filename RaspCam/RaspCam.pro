@@ -32,7 +32,9 @@ SOURCES += main.cpp\
     Hardware/Buzzer/buzzer.cpp \
     Hardware/Key/key.cpp \
     Resource/resource.cpp \
-    Network/parsemysql.cpp
+    Network/parsemysql.cpp \
+    Hardware/LaserSensor/laserSensor.cpp \
+    Hardware/VibrationMotor/vibMotor.cpp
 
 HEADERS  += mainwindow.h \
     Camera/camera.h \
@@ -45,7 +47,22 @@ HEADERS  += mainwindow.h \
     Hardware/Buzzer/melody.h \
     Hardware/Key/key.h \
     Resource/resource.h \
-    Network/parsemysql.h
+    Network/parsemysql.h \
+    Hardware/hardware.h \
+    Hardware/LaserSensor/inc/vl53l0x_api.h \
+    Hardware/LaserSensor/inc/vl53l0x_api_calibration.h \
+    Hardware/LaserSensor/inc/vl53l0x_api_core.h \
+    Hardware/LaserSensor/inc/vl53l0x_api_ranging.h \
+    Hardware/LaserSensor/inc/vl53l0x_api_strings.h \
+    Hardware/LaserSensor/inc/vl53l0x_def.h \
+    Hardware/LaserSensor/inc/vl53l0x_device.h \
+    Hardware/LaserSensor/inc/vl53l0x_interrupt_threshold_settings.h \
+    Hardware/LaserSensor/inc/vl53l0x_platform.h \
+    Hardware/LaserSensor/inc/vl53l0x_platform_log.h \
+    Hardware/LaserSensor/inc/vl53l0x_tuning.h \
+    Hardware/LaserSensor/inc/vl53l0x_types.h \
+    Hardware/LaserSensor/laserSensor.h \
+    Hardware/VibrationMotor/vibMotor.h
 
 FORMS    += mainwindow.ui
 

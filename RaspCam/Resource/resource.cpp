@@ -91,6 +91,7 @@ int Resource::getSize()
     return size;
 
 }
+/*
 void Resource::updateImg(int idx,cv::Mat img)
 {
     this->mutex.lock();
@@ -100,7 +101,7 @@ void Resource::updateImg(int idx,cv::Mat img)
 
     this->mutex.unlock();
 }
-
+*/
 cv::Mat Resource::getClearImg()
 {
     return blank;

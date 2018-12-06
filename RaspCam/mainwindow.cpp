@@ -30,15 +30,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     // this->setWindowFlags(Qt::Popup);
+    
+
+    /******************************************
+    *   basic module initialization
+    ******************************************/
     res = new Resource();
-
-
-    // init camera
+    /* init camera */
     this->camTh = new Camera(D_CAMERA_POLLING_MSEC, D_CAMEARA_CAPTURE_WIDTH, D_CAMEARA_CAPTURE_HEIGHT);
     connect(this->camTh, SIGNAL(captureImg()), this, SLOT(streamImg()));
     this->camTh->start();
 
-    // init nework
+    /* init nework */
     this->netTh = new Network(D_NETWORK_SLEEP_MSEC,res);
 
     connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
@@ -47,15 +50,34 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(updateDbReq()), this->netTh, SLOT(updateDbAccuracies()));
     this->netTh->start();
 
-    // buzzer init
+    /******************************************
+    *   optional module initialization
+    ******************************************/
+    /* buzzer init */
     this->buzzerTh = new Buzzer();
     this->buzzerTh->start();
 
-    // key init
+    /* key init */
     this->keyTh = new Key();
+    // connect key pressed signal.
     connect(this->keyTh, SIGNAL(keyPressed()), this, SLOT(on_externalButton_pressed()));
     this->keyTh->start();
 
+    /* vibmotor init */
+    this->vibTh = new VibMotor();
+    this->vibTh->start();
+
+    /* laser sensor init */
+    this->laserTh = new LaserSensor();
+    // connect laser sensor
+    connect(this->keyTh, SIGNAL(approachingDetected()), this, SLOT(on_externalButton_pressed()));
+    this->laserTh->start();
+
+
+    /******************************************
+    *   UI initialization
+    ******************************************/
+    /* setup ui */
     ui->setupUi(this);
 
 	// ip combo box
@@ -142,6 +164,7 @@ MainWindow::MainWindow(QWidget *parent) :
 */
     waitForResponse = false;
 
+    // update ui
     updateLowerUI(0);
 }
 
@@ -329,6 +352,7 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
         {
             this->keyTh->setLeds(false, true, false);
             this->buzzerTh->playCaptureResultOKMelody();
+            
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(0,255,0), 10);
 
             // update img
@@ -352,6 +376,7 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
         {
             this->keyTh->setLeds(true, false, false);
             this->buzzerTh->playWrongMelody();
+            this->vibTh->ngVibrate();
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(255,0,0), 10);
         }
 

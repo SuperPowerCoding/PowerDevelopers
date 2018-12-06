@@ -3,11 +3,19 @@
 
 Key::Key()
 {
+    
+    this->pollingPeriod = KEY_POLLING_PERIOD_MS;
+
+#if KEY_MODULE_ENABLE == 0
+    this->_enabled = false;
+    return;
+#endif
+    
     this->_enabled = true;
-    this->_exit = false;
-    this->pollingPeriod = 1;
 
     pinMode(KeyPin, INPUT);
+
+#if LED_MODULE_ENALBE
     pinMode(LedRed, OUTPUT);
     pinMode(LedGreen, OUTPUT);
     pinMode(LedYellow, OUTPUT);
@@ -15,9 +23,13 @@ Key::Key()
     digitalWrite(LedRed, HIGH);
     digitalWrite(LedGreen, HIGH);
     digitalWrite(LedYellow, HIGH);
+#endif
 }
 
-
+void Key::setEnable(bool en)
+{
+    this->_enabled = en;
+}
 
 
 void Key::run()
@@ -26,15 +38,20 @@ void Key::run()
     int port;
     bool longKey = false;
 
-    while(!this->_exit)
+    while(this->_enabled)
     {
         port = digitalRead(KeyPin);
 
+        // detect high
         if(port == 1)
         {
+            // start chattering
             count++;
-            if(count > 150)
+
+            // if the key is pressed for 150 ms
+            if(count > 150) 
             {
+                // event
                 emit keyPressed();
                 longKey = true;
             }
@@ -56,6 +73,7 @@ void Key::run()
 
 void Key::setRed(bool onoff)
 {
+#if LED_MODULE_ENALBE
     if(onoff)
     {
         digitalWrite(LedRed, LOW);
@@ -64,10 +82,12 @@ void Key::setRed(bool onoff)
     {
         digitalWrite(LedRed, HIGH);
     }
+#endif
 }
 
 void Key::setGreen(bool onoff)
 {
+#if LED_MODULE_ENALBE    
     if(onoff)
     {
         digitalWrite(LedGreen, LOW);
@@ -76,10 +96,12 @@ void Key::setGreen(bool onoff)
     {
         digitalWrite(LedGreen, HIGH);
     }
+#endif
 }
 
 void Key::setYellow(bool onoff)
 {
+#if LED_MODULE_ENALBE
     if(onoff)
     {
         digitalWrite(LedYellow, LOW);
@@ -88,11 +110,14 @@ void Key::setYellow(bool onoff)
     {
         digitalWrite(LedYellow, HIGH);
     }
+#endif
 }
 
 void Key::setLeds(bool red, bool green, bool yellow)
 {
+#if LED_MODULE_ENALBE
     this->setRed(red);
     this->setGreen(green);
     this->setYellow(yellow);
+#endif
 }

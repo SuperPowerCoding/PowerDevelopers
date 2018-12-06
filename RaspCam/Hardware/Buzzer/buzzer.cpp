@@ -5,30 +5,51 @@
 
 Buzzer::Buzzer()
 {
-    if(wiringPiSetup() == -1){ //when initialize wiring failed,print messageto screen
-            qDebug() << "setup wiringPi failed !";
 
-    }
-
-    if(softToneCreate(BuzPin) == -1){
-        qDebug() << "setup softTone failed !";
-    }
-
-    this->pollingPeriod = 1;
-
+    this->pollingPeriod = BUZZER_POLLING_PERIOD_MS;
     this->curidx = 0;
     this->lastIdx = 0;
     this->size = 0;
 
-    this->_exit = false;
-    this->_enabled = true;
+#if BUZZER_MODULE_ENALBE == 0
+    this->_enabled = false;
+    qDebug() << "buzzer disabled";
+    return;
+#endif
+
+    this->_enabled = buzzerHwInit(BuzPin);
+
+    if(this->_enabled == false)
+    {
+        return;
+    }
 
     qDebug() << "init buzzer success";
+}
+
+bool Buzzer::buzzerHwInit(RaspCam_Port_Map buzerPin)
+{
+    if(wiringPiSetup() == -1){ //when initialize wiring failed,print messageto screen
+            qDebug() << "setup wiringPi failed !";
+            return false;
+    }
+
+    if(softToneCreate(buzerPin) == -1){
+        qDebug() << "setup softTone failed !";
+        return false;
+    }
+
+    return true;
 }
 
 bool Buzzer::isEnabled()
 {
     return this->_enabled;
+}
+
+void Buzzer::setEnable(bool en)
+{
+    this->_enabled = en;
 }
 
 
@@ -39,6 +60,8 @@ void Buzzer::close()
 
 void Buzzer::addNote(int tone, int beat)
 {
+    if(!this->_enabled) return;
+
     this->mutex.lock();
 
     this->lastIdx++;
@@ -62,6 +85,8 @@ void Buzzer::addNote(int tone, int beat)
 
 void Buzzer::instantNote(int tone, int beat)
 {
+    if(!this->_enabled) return;
+
     this->mutex.lock();
 
     this->beatRingBuf[this->curidx] = beat;
@@ -72,6 +97,8 @@ void Buzzer::instantNote(int tone, int beat)
 
 void Buzzer::getNote(int * tone, int * beat)
 {
+    if(!this->_enabled) return;
+
     this->mutex.lock();
 
     if(this->size == 0)
@@ -107,6 +134,8 @@ void Buzzer::getNote(int * tone, int * beat)
 
 void Buzzer::addMelody(int *tones, int *beats, int size, bool cut)
 {
+    if(!this->_enabled) return;
+
     for(int i = 0 ; i < size ; i++)
     {
         this->addNote(tones[i],beats[i]);
@@ -119,6 +148,8 @@ void Buzzer::addMelody(int *tones, int *beats, int size, bool cut)
 
 int Buzzer::getSize()
 {
+    if(!this->_enabled) return 0;
+
     int size;
     this->mutex.lock();
 
@@ -132,7 +163,8 @@ int Buzzer::getSize()
 
 void Buzzer::playFinMelody()
 {
-    /*
+    if(!this->_enabled) return;
+    
     this->addNote(tones[5][C],8);
     this->addNote(REST,16);
     this->addNote(tones[5][E],8);
@@ -141,23 +173,29 @@ void Buzzer::playFinMelody()
     this->addNote(REST,16);
     this->addNote(tones[6][C],8);
     this->addNote(REST,16);
-    */
+    
 }
 
 void Buzzer::playGetCoinMelody()
 {
+    if(!this->_enabled) return;
+
     this->addMelody(getCoin[0],getCoin[1],sizeof(getCoin[0])/sizeof(int),false);
     this->addNote(REST,16);
 }
 
 void Buzzer::playBonusUp()
 {
+    if(!this->_enabled) return;
+
     this->addMelody(bonusUp[0],bonusUp[1],sizeof(bonusUp[0])/sizeof(int),false);
     this->addNote(REST,16);
 }
 
 void Buzzer::playBubbleBubble()
 {
+    if(!this->_enabled) return;
+
     for(unsigned int i = 0 ; i < sizeof(bubbleBubble)/(sizeof(bubbleBubble[0])) ; i++)
     {
         this->addMelody(bubbleBubble[i][0],bubbleBubble[i][1],sizeof(bubbleBubble[i][0])/sizeof(int),false);
@@ -167,32 +205,38 @@ void Buzzer::playBubbleBubble()
 
 void Buzzer::playWrongMelody()
 {
-    /*
+    if(!this->_enabled) return;
+    
     this->addNote(tones[5][A],8);
     this->addNote(REST,16);
     this->addNote(tones[5][A],2);
     this->addNote(REST,16);
-    */
+    
 }
 
 void Buzzer::playCaptureMelody()
 {
+    if(!this->_enabled) return;
+
     this->addNote(tones[4][G],32);
     this->addNote(REST,32);
 }
 
 void Buzzer::playCaptureResultOKMelody()
 {
-    /*
+    if(!this->_enabled) return;
+
     this->addNote(tones[5][G],32);
     this->addNote(REST,32);
     this->addNote(tones[5][G],32);
     this->addNote(REST,32);
-    */
+    if(!this->_enabled) return;
 }
 
 void Buzzer::playGetStartMelody()
 {
+    if(!this->_enabled) return;
+
     for(unsigned int i = 0 ; i < sizeof(getStar)/(sizeof(getStar[0])) ; i++)
     {
         this->addMelody(getStar[i][0],getStar[i][1],sizeof(getStar[i][0])/sizeof(int),true);
@@ -239,7 +283,7 @@ void Buzzer::run()
     this->playBonusUp();
     this->addNote(REST,4);
 */
-    while(!this->_exit)
+    while(this->_enabled)
     {
         size = this->getSize();
         if(size > 0 )

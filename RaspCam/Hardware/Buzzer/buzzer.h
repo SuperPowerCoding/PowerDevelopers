@@ -9,8 +9,8 @@
 #include <softTone.h>
 
 #include "tones.h"
+#include "../hardware.h"
 
-#define BuzPin    0
 #define BUZZER_BUF_SIZE 1024
 
 
@@ -19,43 +19,63 @@ class Buzzer : public QThread
     Q_OBJECT
 
 public:
+    /*****************************************************
+    * constructor, destuctor, hardware init method
+    ******************************************************/
     Buzzer();
     ~Buzzer();
+    bool buzzerHwInit(RaspCam_Port_Map buzerPin);
 
-    void addNote(int tone, int beat);
-    void instantNote(int tone, int beat);
-    void addMelody(int * tones, int * beats, int size, bool cut);
+    /*****************************************************
+    * note method
+    ******************************************************/    
+    void addNote(int tone, int beat);               // add a note to tail.
+    void instantNote(int tone, int beat);           // add a note to head.
+    void addMelody(int * tones, int * beats, int size, bool cut);   // add melody to tail
 
+
+    /*****************************************************
+    * play saved melody method
+    ******************************************************/
+    /* super mario melody */ 
     void playGetCoinMelody();
     void playBonusUp();
+    void playGetStartMelody();
+
+    /* bubble bubble melody */
     void playBubbleBubble();
+
+    /* process ok/ng  melody */
     void playWrongMelody();
     void playCaptureMelody();
     void playFinMelody();
-
     void playCaptureResultOKMelody();
-
-    void playGetStartMelody();
-
+    
+    
     bool isEnabled();
-
+    void setEnable(bool en);
 
 private:
-    unsigned int pollingPeriod;
-    bool _exit;
+    /*****************************************************
+    * basic thread 
+    ******************************************************/
+    unsigned int pollingPeriod;    
     bool _enabled;
     void run();
 
-    // ringbuf
+    /*****************************************************
+    * ring buffer
+    ******************************************************/
     int toneRingBuf[BUZZER_BUF_SIZE];
     int beatRingBuf[BUZZER_BUF_SIZE];
     int lastIdx;
     int curidx;
     int size;
-
     QMutex mutex;
 
-
+    /*****************************************************
+    * get
+    ******************************************************/
     void getNote(int * tone, int * beat);
     int getSize();
 

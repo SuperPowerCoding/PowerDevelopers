@@ -70,7 +70,7 @@ typedef enum _RaspCam_Port_Map
 *   key module
 **********************************************/
 // 1. module enable
-#define KEY_MODULE_ENABLE           1
+#define KEY_MODULE_ENABLE           0
 #define LED_MODULE_ENALBE           0
 
 // 2. polling period
@@ -98,7 +98,7 @@ typedef enum _RaspCam_Port_Map
 *   Vib motor module
 **********************************************/
 // 1. module enable
-#define VIB_MOTOR_MODULE_ENALBE     1
+#define VIB_MOTOR_MODULE_ENALBE     0
 
 // 2. polling period
 /* 

@@ -69,8 +69,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /* laser sensor init */
     this->laserTh = new LaserSensor();
+    distanceSensor_retryCnt = 0;
     // connect laser sensor
-    connect(this->keyTh, SIGNAL(approachingDetected()), this, SLOT(on_externalButton_pressed()));
+    connect(this->laserTh, SIGNAL(approachingDetected()), this, SLOT(on_externalButton_pressed()));
     this->laserTh->start();
 
 
@@ -264,6 +265,20 @@ void MainWindow::on_streamingImg_clicked()
     this->drawImg(true,0,0,true);
     waitForResponse = true;
     */
+}
+
+void MainWindow::in_camera_focus_distance()
+{
+    cout<<"in_camera_focus_distance"<<endl;
+    
+    if (waitForResponse == false && ui->tabWidget->currentIndex() == 1)
+    {
+        this->buzzerTh->playCaptureMelody();
+        this->getRawImg();
+        this->drawImg(false,0,0,0,true,0);
+        waitForResponse = true;
+        this->keyTh->setLeds(false, false, true);
+    }
 }
 
 void MainWindow::on_externalButton_pressed()

@@ -26,6 +26,7 @@ private:
     bool _enabled;
     void run();
 
+    bool hardwareInit();
 
 
     VL53L0X_Dev_t MyDevice;

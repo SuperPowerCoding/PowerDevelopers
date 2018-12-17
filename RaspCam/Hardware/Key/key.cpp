@@ -1,5 +1,5 @@
 #include "key.h"
-
+#include <QDebug>
 
 Key::Key()
 {
@@ -8,10 +8,16 @@ Key::Key()
 
 #if KEY_MODULE_ENABLE == 0
     this->_enabled = false;
+    qDebug() << "key disabled";
     return;
 #endif
     
     this->_enabled = true;
+
+    if(wiringPiSetup() == -1){ //when initialize wiring failed,print messageto screen
+            qDebug() << "setup wiringPi failed !! at Key";
+            return ;
+    }
 
     pinMode(KeyPin, INPUT);
 

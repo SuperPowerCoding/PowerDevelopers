@@ -309,7 +309,7 @@ void Buzzer::run()
         }
     }
 
-    this->close();
+    // this->close();
 }
 
 

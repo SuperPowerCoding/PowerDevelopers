@@ -79,6 +79,9 @@ private slots:
     // capture!!
     void on_streamingImg_clicked();
 
+    // captured from distance sensor
+    void in_camera_focus_distance();
+
     // lower ui clicked
     void on_img0_clicked();
     void on_img1_clicked();
@@ -147,6 +150,10 @@ private:
     // int maxIdx;
     int viewIdx;
 
+    /*********************************
+    *  distance sensor
+    **********************************/    
+    int distanceSensor_retryCnt;
     
 
     /*********************************

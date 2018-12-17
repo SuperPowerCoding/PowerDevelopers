@@ -72,3 +72,16 @@ INCLUDEPATH += /usr/include/mysql
 
 LIBS += -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev
 LIBS += -L/usr/lib/arm-linux-gnueabihf -lmysqlclient
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/./release/ -lVL53L0X_Rasp
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/./debug/ -lVL53L0X_Rasp
+else:unix: LIBS += -L$$PWD/./ -lVL53L0X_Rasp
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/./release/libVL53L0X_Rasp.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/./debug/libVL53L0X_Rasp.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/./release/VL53L0X_Rasp.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/./debug/VL53L0X_Rasp.lib
+else:unix: PRE_TARGETDEPS += $$PWD/./libVL53L0X_Rasp.a

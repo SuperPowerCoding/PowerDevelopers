@@ -21,12 +21,16 @@ public:
     bool isEnabled();
     void close();
 
+    void sleep(int ms);
+
 private:
     unsigned int pollingPeriod;    
     bool _enabled;
     void run();
 
     bool hardwareInit();
+
+    int sleepMs;
 
 
     VL53L0X_Dev_t MyDevice;

@@ -168,6 +168,8 @@ LaserSensor::LaserSensor()
     {
         printf("Failed to init laserSensor Hardware!!\n");        
     }
+
+    sleepMs = 0;
 }
 
 
@@ -246,6 +248,11 @@ VL53L0X_Error LaserSensor::WaitStopCompleted(VL53L0X_DEV Dev) {
     return Status;
 }
 
+void LaserSensor::sleep(int ms)
+{
+    sleepMs = ms;
+}
+
 void LaserSensor::run()
 {
     VL53L0X_RangingMeasurementData_t    RangingMeasurementData;
@@ -312,6 +319,11 @@ void LaserSensor::run()
         
         while(_enabled)
         {
+            if(sleepMs)
+            {
+                msleep(sleepMs);
+                sleepMs = 0;
+            }
 
             Status = WaitMeasurementDataReady(pMyDevice);
 
@@ -321,7 +333,7 @@ void LaserSensor::run()
                 
                 filteredVal = medianFilter(pRangingMeasurementData->RangeMilliMeter);
 
-                printf("Laser :%d, %d\n",pRangingMeasurementData->RangeMilliMeter, filteredVal);
+                // printf("Laser :%d, %d\n",pRangingMeasurementData->RangeMilliMeter, filteredVal);
 
                 if(MIN_DETECT_DISTANCE <= filteredVal && filteredVal <= MAX_DETECT_DISTANCE )
                 {

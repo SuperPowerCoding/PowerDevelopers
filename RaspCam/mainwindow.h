@@ -32,6 +32,14 @@ class MainWindow;
 #define ERR_PRE_SEQ_FAIL        3
 #define ERR_UNKNOWN              4
 
+enum CaptureStatus
+{
+    NOT_CAPTURED_YET = 0,
+    CAPTURED_FROM_BUTTON,
+    CAPTURED_FROM_SENSOR,
+    CAPTURED_STATUS_OVERFLOW
+};
+
 
 class MainWindow : public QMainWindow
 {
@@ -130,7 +138,7 @@ private:
     VibMotor * vibTh = NULL;        // vibration motor module for vibaration
 
     
-
+    CaptureStatus curCapturedStatus = CaptureStatus::NOT_CAPTURED_YET;
 //   QPoint m_down;
 //   QPoint m_up;
    /*********************************
@@ -171,7 +179,6 @@ private:
 
     void setPort();
     void setImgMatchRate();
-
     /*********************************
     *   draw image method
     **********************************/
@@ -183,6 +190,13 @@ private:
 
     void imgClickEvent(int idx);
     
+
+    /*
+    *   capture Status
+    */
+   bool setCaptureStatus(CaptureStatus status);
+   bool canWeCaptureNow();
+   
 
 signals :
     void updateRawImgFin();

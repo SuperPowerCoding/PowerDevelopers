@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->laserTh = new LaserSensor();
     distanceSensor_retryCnt = 0;
     // connect laser sensor
-    connect(this->laserTh, SIGNAL(approachingDetected()), this, SLOT(on_externalButton_pressed()));
+    connect(this->laserTh, SIGNAL(approachingDetected()), this, SLOT(in_camera_focus_distance()));
     this->laserTh->start();
 
 
@@ -239,6 +239,58 @@ void MainWindow::updateIPResult()
     this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.matchRate,this->netTh->ipResult.result, this->netTh->ipResult.err_code);
 }
 
+bool MainWindow::setCaptureStatus(CaptureStatus status)
+{
+    bool response = false;
+    
+    if(curCapturedStatus != CaptureStatus::NOT_CAPTURED_YET) return false;
+
+    switch(status)
+    {
+        case CaptureStatus::NOT_CAPTURED_YET:
+            curCapturedStatus = status;
+            distanceSensor_retryCnt = 0;
+            response = true;            
+            break;
+        
+        case CaptureStatus::CAPTURED_FROM_BUTTON:
+            response = curCapturedStatus == CaptureStatus::NOT_CAPTURED_YET ? true : false;
+            if(response == true)curCapturedStatus = status;
+            break;
+
+        case CaptureStatus::CAPTURED_FROM_SENSOR:
+            if(curCapturedStatus != CaptureStatus::CAPTURED_FROM_BUTTON)
+            {
+                curCapturedStatus = status;
+                response = true;
+                distanceSensor_retryCnt++;
+                qDebug() << "laser Sensor : trial " << distanceSensor_retryCnt;
+            }
+            else
+            {
+                response = false;
+            }
+        default :
+            return false;
+    }
+    
+    return response;
+}
+
+bool MainWindow::canWeCaptureNow()
+{
+    if(
+        (curCapturedStatus == CaptureStatus::NOT_CAPTURED_YET) && 
+        (ui->tabWidget->currentIndex() == 1)
+    )
+    {
+        return true;
+    }
+
+    qDebug() << "can't capture now";
+
+    return false;
+}
 
 void MainWindow::updateResource()
 {
@@ -252,13 +304,14 @@ void MainWindow::on_streamingImg_clicked()
 {
     cout<<"streaming IMG Clicked!!!"<<endl;
 
-    if (waitForResponse == false && ui->tabWidget->currentIndex() == 1)
+    if (canWeCaptureNow() == true)
     {
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
         this->drawImg(false,0,0,0,true,0);
-        waitForResponse = true;
+        
         this->keyTh->setLeds(false, false, true);
+        setCaptureStatus(CaptureStatus::CAPTURED_FROM_BUTTON);
     }
 
     /*
@@ -269,15 +322,16 @@ void MainWindow::on_streamingImg_clicked()
 
 void MainWindow::in_camera_focus_distance()
 {
-    cout<<"in_camera_focus_distance"<<endl;
-    
-    if (waitForResponse == false && ui->tabWidget->currentIndex() == 1)
+    if (canWeCaptureNow() == true)
     {
+        cout<<"in_camera_focus_distance"<<endl;
+        
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
         this->drawImg(false,0,0,0,true,0);
-        waitForResponse = true;
+        
         this->keyTh->setLeds(false, false, true);
+        setCaptureStatus(CaptureStatus::CAPTURED_FROM_SENSOR);        
     }
 }
 
@@ -391,7 +445,22 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
         {
             this->keyTh->setLeds(true, false, false);
             this->buzzerTh->playWrongMelody();
-            this->vibTh->ngVibrate();
+            
+            if(curCapturedStatus != CaptureStatus::CAPTURED_FROM_SENSOR)
+            {
+                this->vibTh->ngVibrate();                
+            }
+            else
+            {
+                if(distanceSensor_retryCnt == 3)
+                {
+                    this->vibTh->ngVibrate();                    
+                    this->laserTh->sleep(1000);
+                }
+            }
+
+            setCaptureStatus(CaptureStatus::NOT_CAPTURED_YET);
+
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(255,0,0), 10);
         }
 

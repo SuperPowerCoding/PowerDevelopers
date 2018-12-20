@@ -70,7 +70,7 @@ typedef enum _RaspCam_Port_Map
 *   key module
 **********************************************/
 // 1. module enable
-#define KEY_MODULE_ENABLE           0
+#define KEY_MODULE_ENABLE           1
 #define LED_MODULE_ENALBE           0
 
 // 2. polling period
@@ -92,13 +92,13 @@ typedef enum _RaspCam_Port_Map
     Must do not change polling period.    
     It is just for task sleep to operate safely.
 */
-#define LASER_SENSOR_POLLING_PERIOD_MS  1   
+#define LASER_SENSOR_POLLING_PERIOD_MS  10
 
 /*********************************************
 *   Vib motor module
 **********************************************/
 // 1. module enable
-#define VIB_MOTOR_MODULE_ENALBE     0
+#define VIB_MOTOR_MODULE_ENALBE     1
 
 // 2. polling period
 /* 

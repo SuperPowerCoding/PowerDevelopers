@@ -6,6 +6,7 @@
 #include <QObject>
 #include "../hardware.h"
 
+
 extern "C"
 {
 #include "inc/vl53l0x_api.h"
@@ -19,9 +20,16 @@ class LaserSensor : public QThread
 public:
     LaserSensor();
     bool isEnabled();
-    void close();
+    
 
     void sleep(int ms);
+
+    int getCurDistance();    
+
+    void stopMeasure();
+    void startMeasure();
+
+    void clearInterruptFlag();
 
 private:
     unsigned int pollingPeriod;    
@@ -29,8 +37,12 @@ private:
     void run();
 
     bool hardwareInit();
+    bool interruptFlag;
 
     int sleepMs;
+
+    bool _measure;
+    QMutex measureMutex;
 
 
     VL53L0X_Dev_t MyDevice;
@@ -46,9 +58,15 @@ private:
     VL53L0X_Error WaitStopCompleted(VL53L0X_DEV Dev);
     VL53L0X_Error WaitMeasurementDataReady(VL53L0X_DEV Dev);
 
+    QMutex mutex;
+    int distance;   // ms
+
+    void setCurDistance(int dist);
+    void resetDevice();
 
 signals:
     void approachingDetected();
+    void requestDistanceUpdate();
 };
 
 

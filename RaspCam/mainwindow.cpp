@@ -3,6 +3,7 @@
  * * * * * * * * * * * * * * * * * * * */
 #include <QDebug>
 #include <qevent.h>
+
 #include <QTime>
 
 /* * * * * * * * * * * * * * * * * * * *
@@ -42,14 +43,14 @@ MainWindow::MainWindow(QWidget *parent) :
     this->camTh->start();
 
     /* init nework */
+#if DEBUG_MODE == DEBUG_OFF    
     this->netTh = new Network(D_NETWORK_SLEEP_MSEC,res);
-
     connect(this, SIGNAL(updateRawImgFin()), this->netTh, SLOT(sendRawImgData()));
 	connect(this->netTh, SIGNAL(imgProcessFin()), this, SLOT(updateIPResult()));
     connect(this->netTh, SIGNAL(resourceUpdateFin()), this, SLOT(updateResource()));
     connect(this, SIGNAL(updateDbReq()), this->netTh, SLOT(updateDbAccuracies()));
     this->netTh->start();
-
+#endif
     /******************************************
     *   optional module initialization
     ******************************************/
@@ -69,10 +70,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /* laser sensor init */
     this->laserTh = new LaserSensor();
-    distanceSensor_retryCnt = 0;
+    clearTrialCnt();
     // connect laser sensor
     connect(this->laserTh, SIGNAL(approachingDetected()), this, SLOT(in_camera_focus_distance()));
+    connect(this->laserTh, SIGNAL(requestDistanceUpdate()), this, SLOT(updateDistance()));
+    
     this->laserTh->start();
+    this->laserTh->stopMeasure();
 
 
     /******************************************
@@ -198,10 +202,14 @@ void MainWindow::getRawImg()
 	//this->preCapturedMatImg = this->camTh->getCapturedImg();
 	
 	qDebug() << "[ui->net]index : " << this->curIdx << "," << res->getImgIdx(this->curIdx);
-	
+
+#if DEBUG_MODE == DEBUG_OFF
     this->netTh->setRawImgData(data, size, res->getImgIdx(this->curIdx), res->getImgAccuracy(this->curIdx), res->getStepNum(this->curIdx), res->getIsFinal(this->curIdx));
 
     emit updateRawImgFin();
+#else    
+    updateIPResult();
+#endif
     cout<<"[TIME] getRawImg sec : "<<time.second()<<" ms : "<<time.msec()<<endl;
 
 
@@ -235,22 +243,30 @@ void MainWindow::updateIPResult()
 {
 	// show result data
     qDebug() << "result";
-    waitForResponse = false;
+    
+#if DEBUG_MODE == DEBUG_OFF
     this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.matchRate,this->netTh->ipResult.result, this->netTh->ipResult.err_code);
+#elif DEBUG_MODE == DEBUG_ALWAYS_OK
+    this->drawImg(true,0,0,100,true,0);
+#elif DEBUG_MODE == DEBUG_ALWAYS_NG
+    this->drawImg(true,0,0,100,false,0);
+#endif
+    this->laserTh->clearInterruptFlag();
+    setCaptureStatus(CaptureStatus::NOT_CAPTURED_YET);
 }
 
 bool MainWindow::setCaptureStatus(CaptureStatus status)
 {
     bool response = false;
-    
-    if(curCapturedStatus != CaptureStatus::NOT_CAPTURED_YET) return false;
+
+    statusMutex.lock();
 
     switch(status)
     {
         case CaptureStatus::NOT_CAPTURED_YET:
-            curCapturedStatus = status;
-            distanceSensor_retryCnt = 0;
+            curCapturedStatus = status;            
             response = true;            
+            qDebug() << "Status : waiting for capture";
             break;
         
         case CaptureStatus::CAPTURED_FROM_BUTTON:
@@ -264,41 +280,80 @@ bool MainWindow::setCaptureStatus(CaptureStatus status)
                 curCapturedStatus = status;
                 response = true;
                 distanceSensor_retryCnt++;
-                qDebug() << "laser Sensor : trial " << distanceSensor_retryCnt;
+                qDebug() << "Status : captured from laser Sensor(trial:" << distanceSensor_retryCnt << ")";
             }
             else
             {
                 response = false;
             }
         default :
-            return false;
+            response = false;
     }
     
+    statusMutex.unlock();
+
     return response;
 }
 
 bool MainWindow::canWeCaptureNow()
 {
+    bool result = false;
+    
+    statusMutex.lock();
     if(
         (curCapturedStatus == CaptureStatus::NOT_CAPTURED_YET) && 
-        (ui->tabWidget->currentIndex() == 1)
+        (ui->tabWidget->currentIndex() == 1) && (getTrialCnt() < MAX_RETRY_NUM)
     )
     {
-        return true;
+        result = true;
     }
 
-    qDebug() << "can't capture now";
-
-    return false;
+    statusMutex.unlock();
+   
+    return result;
 }
 
 void MainWindow::updateResource()
 {
     this->curIdx = -1;
+    this->laserTh->startMeasure();
     this->updateLowerUI(this->curIdx);
+    this->resourceFin = true;
+}
+
+void MainWindow::increaseTrialCnt()
+{
+    distMutex.lock();
+
+    distanceSensor_retryCnt++;
+    if(distanceSensor_retryCnt >= MAX_RETRY_NUM)
+    {
+        distanceSensor_retryCnt = 0;
+        if(this->vibTh != NULL) this->vibTh->ngVibrate();  
+        if(this->laserTh != NULL) this->laserTh->sleep(SLEEP_MS_AT_FAILED);
+    }
+
+    distMutex.unlock();
 }
 
 
+int MainWindow::getTrialCnt()
+{
+    int temp;
+
+    distMutex.lock();
+    temp = distanceSensor_retryCnt;
+    distMutex.unlock();
+
+    return temp;
+}
+
+void MainWindow::clearTrialCnt()
+{
+    distMutex.lock();
+    distanceSensor_retryCnt = 0;
+    distMutex.unlock();
+}
 
 void MainWindow::on_streamingImg_clicked()
 {
@@ -306,12 +361,18 @@ void MainWindow::on_streamingImg_clicked()
 
     if (canWeCaptureNow() == true)
     {
+        setCaptureStatus(CaptureStatus::CAPTURED_FROM_BUTTON);
+
         this->buzzerTh->playCaptureMelody();
         this->getRawImg();
         this->drawImg(false,0,0,0,true,0);
         
         this->keyTh->setLeds(false, false, true);
-        setCaptureStatus(CaptureStatus::CAPTURED_FROM_BUTTON);
+        
+
+#if DEBUG_MODE != DEBUG_OFF        
+        updateIPResult();
+#endif
     }
 
     /*
@@ -324,6 +385,8 @@ void MainWindow::in_camera_focus_distance()
 {
     if (canWeCaptureNow() == true)
     {
+        setCaptureStatus(CaptureStatus::CAPTURED_FROM_SENSOR);
+
         cout<<"in_camera_focus_distance"<<endl;
         
         this->buzzerTh->playCaptureMelody();
@@ -331,8 +394,33 @@ void MainWindow::in_camera_focus_distance()
         this->drawImg(false,0,0,0,true,0);
         
         this->keyTh->setLeds(false, false, true);
-        setCaptureStatus(CaptureStatus::CAPTURED_FROM_SENSOR);        
+
+#if DEBUG_MODE != DEBUG_OFF
+        updateIPResult();
+#endif
     }
+}
+
+
+void MainWindow::updateDistance()
+{
+    int distance = this->laserTh->getCurDistance();
+
+    QString rate = "";
+    
+    int upper;
+    int lower;
+
+    upper = distance / 10;
+    lower = distance % 10;
+
+    rate = QString::number(upper);
+    rate.append(".");
+    rate.append(QString::number(lower));
+    rate.append(" cm");
+    this->ui->curDistance->setText(rate);
+
+
 }
 
 void MainWindow::on_externalButton_pressed()
@@ -357,9 +445,11 @@ void MainWindow::on_ResetButton_clicked()
     this->curIdx = -1;
 	this->viewIdx = 0;
 	this->res->clear();
-	
+
+    this->laserTh->stopMeasure();
+#if DEBUG_MODE == DEBUG_OFF	
 	this->netTh->resetFlag = true;
-	
+#endif
 	for(int i = 0 ; i < D_UI_NUMBER_OF_LOWER_UI_IMGS; i++)
 	{
 		index[i] = 0;
@@ -373,6 +463,8 @@ void MainWindow::on_ResetButton_clicked()
     ui->preCapturedImg->setPixmap(QPixmap::fromImage(QImage(img.data, img.cols, img.rows, img.step, QImage::Format_RGB888)));
 
 	updateLowerUI(viewIdx);
+
+    this->resourceFin = false;
 }
 
 void MainWindow::on_leftButton_clicked()
@@ -440,6 +532,12 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
 			{
 				updateLowerUI(-1);
 			}
+
+            
+            this->vibTh->okVibrate();
+            clearTrialCnt();
+            
+            if(this->laserTh != NULL) this->laserTh->sleep(SLEEP_MS_AT_FAILED);
         }
         else
         {
@@ -452,14 +550,8 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
             }
             else
             {
-                if(distanceSensor_retryCnt == 3)
-                {
-                    this->vibTh->ngVibrate();                    
-                    this->laserTh->sleep(1000);
-                }
+                increaseTrialCnt();
             }
-
-            setCaptureStatus(CaptureStatus::NOT_CAPTURED_YET);
 
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(255,0,0), 10);
         }
@@ -516,6 +608,7 @@ void MainWindow::updateLowerUI(int indexStart)
     QTime time;
 
     time.start();
+    
 	indexStart = indexStart == -1 ? preIdx : indexStart;
 	
 	this->viewIdx = indexStart;
@@ -561,7 +654,9 @@ void MainWindow::on_tabWidget_currentChanged(int index)
 
 	if(index == 1)
 	{
-		this->netTh->userSettingFlag = true;
+#if DEBUG_MODE == DEBUG_OFF
+        this->netTh->userSettingFlag = true;
+#endif
         this->keyTh->setLeds(false, true, false);
 	}
     else
@@ -596,6 +691,7 @@ void MainWindow::setIpAddress() // test ok
     tempQs = IP.toLatin1();
 
     netTh->setServerIpAddress(tempQs.data());
+
 
 }
 

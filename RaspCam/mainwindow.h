@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <QPushButton>
+#include <QMutex>
+#include <QThread>
+#include <QObject>
 
 // basic module headers
 #include "Camera/camera.h"
@@ -31,6 +34,10 @@ class MainWindow;
 #define ERR_ALREADY_REGISTERED  2
 #define ERR_PRE_SEQ_FAIL        3
 #define ERR_UNKNOWN              4
+
+
+#define MAX_RETRY_NUM       1
+#define SLEEP_MS_AT_FAILED  2000
 
 enum CaptureStatus
 {
@@ -89,6 +96,7 @@ private slots:
 
     // captured from distance sensor
     void in_camera_focus_distance();
+    void updateDistance();
 
     // lower ui clicked
     void on_img0_clicked();
@@ -137,10 +145,10 @@ private:
     LaserSensor * laserTh = NULL;   // laser distance sensor for automatic camera shutter.
     VibMotor * vibTh = NULL;        // vibration motor module for vibaration
 
-    
+    // camera status
     CaptureStatus curCapturedStatus = CaptureStatus::NOT_CAPTURED_YET;
-//   QPoint m_down;
-//   QPoint m_up;
+    QMutex statusMutex;
+
    /*********************************
     *   modules
     **********************************/
@@ -162,6 +170,11 @@ private:
     *  distance sensor
     **********************************/    
     int distanceSensor_retryCnt;
+    QMutex distMutex;
+
+    void increaseTrialCnt();
+    int getTrialCnt();
+    void clearTrialCnt();
     
 
     /*********************************

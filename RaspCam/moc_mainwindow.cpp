@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[33];
-    char stringdata0[649];
+    QByteArrayData data[34];
+    char stringdata0[664];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -46,22 +46,23 @@ QT_MOC_LITERAL(13, 201, 22), // "on_rightButton_clicked"
 QT_MOC_LITERAL(14, 224, 21), // "on_exitButton_clicked"
 QT_MOC_LITERAL(15, 246, 23), // "on_streamingImg_clicked"
 QT_MOC_LITERAL(16, 270, 24), // "in_camera_focus_distance"
-QT_MOC_LITERAL(17, 295, 15), // "on_img0_clicked"
-QT_MOC_LITERAL(18, 311, 15), // "on_img1_clicked"
-QT_MOC_LITERAL(19, 327, 15), // "on_img2_clicked"
-QT_MOC_LITERAL(20, 343, 15), // "on_img3_clicked"
-QT_MOC_LITERAL(21, 359, 15), // "on_img4_clicked"
-QT_MOC_LITERAL(22, 375, 27), // "on_tabWidget_currentChanged"
-QT_MOC_LITERAL(23, 403, 5), // "index"
-QT_MOC_LITERAL(24, 409, 31), // "on_factorycb_currentTextChanged"
-QT_MOC_LITERAL(25, 441, 4), // "arg1"
-QT_MOC_LITERAL(26, 446, 28), // "on_ipcb1_currentIndexChanged"
-QT_MOC_LITERAL(27, 475, 28), // "on_ipcb2_currentIndexChanged"
-QT_MOC_LITERAL(28, 504, 28), // "on_ipcb3_currentIndexChanged"
-QT_MOC_LITERAL(29, 533, 28), // "on_ipcb4_currentIndexChanged"
-QT_MOC_LITERAL(30, 562, 29), // "on_portcb_currentIndexChanged"
-QT_MOC_LITERAL(31, 592, 32), // "on_cellinfocb_currentTextChanged"
-QT_MOC_LITERAL(32, 625, 23) // "on_updateButton_clicked"
+QT_MOC_LITERAL(17, 295, 14), // "updateDistance"
+QT_MOC_LITERAL(18, 310, 15), // "on_img0_clicked"
+QT_MOC_LITERAL(19, 326, 15), // "on_img1_clicked"
+QT_MOC_LITERAL(20, 342, 15), // "on_img2_clicked"
+QT_MOC_LITERAL(21, 358, 15), // "on_img3_clicked"
+QT_MOC_LITERAL(22, 374, 15), // "on_img4_clicked"
+QT_MOC_LITERAL(23, 390, 27), // "on_tabWidget_currentChanged"
+QT_MOC_LITERAL(24, 418, 5), // "index"
+QT_MOC_LITERAL(25, 424, 31), // "on_factorycb_currentTextChanged"
+QT_MOC_LITERAL(26, 456, 4), // "arg1"
+QT_MOC_LITERAL(27, 461, 28), // "on_ipcb1_currentIndexChanged"
+QT_MOC_LITERAL(28, 490, 28), // "on_ipcb2_currentIndexChanged"
+QT_MOC_LITERAL(29, 519, 28), // "on_ipcb3_currentIndexChanged"
+QT_MOC_LITERAL(30, 548, 28), // "on_ipcb4_currentIndexChanged"
+QT_MOC_LITERAL(31, 577, 29), // "on_portcb_currentIndexChanged"
+QT_MOC_LITERAL(32, 607, 32), // "on_cellinfocb_currentTextChanged"
+QT_MOC_LITERAL(33, 640, 23) // "on_updateButton_clicked"
 
     },
     "MainWindow\0updateRawImgFin\0\0updateDbReq\0"
@@ -71,12 +72,12 @@ QT_MOC_LITERAL(32, 625, 23) // "on_updateButton_clicked"
     "on_ResetButton_clicked\0on_leftButton_clicked\0"
     "on_rightButton_clicked\0on_exitButton_clicked\0"
     "on_streamingImg_clicked\0"
-    "in_camera_focus_distance\0on_img0_clicked\0"
-    "on_img1_clicked\0on_img2_clicked\0"
-    "on_img3_clicked\0on_img4_clicked\0"
-    "on_tabWidget_currentChanged\0index\0"
-    "on_factorycb_currentTextChanged\0arg1\0"
-    "on_ipcb1_currentIndexChanged\0"
+    "in_camera_focus_distance\0updateDistance\0"
+    "on_img0_clicked\0on_img1_clicked\0"
+    "on_img2_clicked\0on_img3_clicked\0"
+    "on_img4_clicked\0on_tabWidget_currentChanged\0"
+    "index\0on_factorycb_currentTextChanged\0"
+    "arg1\0on_ipcb1_currentIndexChanged\0"
     "on_ipcb2_currentIndexChanged\0"
     "on_ipcb3_currentIndexChanged\0"
     "on_ipcb4_currentIndexChanged\0"
@@ -92,7 +93,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      28,   14, // methods
+      29,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -100,36 +101,37 @@ static const uint qt_meta_data_MainWindow[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,  154,    2, 0x06 /* Public */,
-       3,    0,  155,    2, 0x06 /* Public */,
+       1,    0,  159,    2, 0x06 /* Public */,
+       3,    0,  160,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       4,    0,  156,    2, 0x08 /* Private */,
-       5,    0,  157,    2, 0x08 /* Private */,
-       6,    0,  158,    2, 0x08 /* Private */,
-       7,    0,  159,    2, 0x08 /* Private */,
-       8,    0,  160,    2, 0x08 /* Private */,
-       9,    1,  161,    2, 0x08 /* Private */,
-      11,    0,  164,    2, 0x08 /* Private */,
-      12,    0,  165,    2, 0x08 /* Private */,
-      13,    0,  166,    2, 0x08 /* Private */,
-      14,    0,  167,    2, 0x08 /* Private */,
-      15,    0,  168,    2, 0x08 /* Private */,
-      16,    0,  169,    2, 0x08 /* Private */,
-      17,    0,  170,    2, 0x08 /* Private */,
-      18,    0,  171,    2, 0x08 /* Private */,
-      19,    0,  172,    2, 0x08 /* Private */,
-      20,    0,  173,    2, 0x08 /* Private */,
-      21,    0,  174,    2, 0x08 /* Private */,
-      22,    1,  175,    2, 0x08 /* Private */,
-      24,    1,  178,    2, 0x08 /* Private */,
-      26,    1,  181,    2, 0x08 /* Private */,
-      27,    1,  184,    2, 0x08 /* Private */,
-      28,    1,  187,    2, 0x08 /* Private */,
-      29,    1,  190,    2, 0x08 /* Private */,
-      30,    1,  193,    2, 0x08 /* Private */,
-      31,    1,  196,    2, 0x08 /* Private */,
-      32,    0,  199,    2, 0x08 /* Private */,
+       4,    0,  161,    2, 0x08 /* Private */,
+       5,    0,  162,    2, 0x08 /* Private */,
+       6,    0,  163,    2, 0x08 /* Private */,
+       7,    0,  164,    2, 0x08 /* Private */,
+       8,    0,  165,    2, 0x08 /* Private */,
+       9,    1,  166,    2, 0x08 /* Private */,
+      11,    0,  169,    2, 0x08 /* Private */,
+      12,    0,  170,    2, 0x08 /* Private */,
+      13,    0,  171,    2, 0x08 /* Private */,
+      14,    0,  172,    2, 0x08 /* Private */,
+      15,    0,  173,    2, 0x08 /* Private */,
+      16,    0,  174,    2, 0x08 /* Private */,
+      17,    0,  175,    2, 0x08 /* Private */,
+      18,    0,  176,    2, 0x08 /* Private */,
+      19,    0,  177,    2, 0x08 /* Private */,
+      20,    0,  178,    2, 0x08 /* Private */,
+      21,    0,  179,    2, 0x08 /* Private */,
+      22,    0,  180,    2, 0x08 /* Private */,
+      23,    1,  181,    2, 0x08 /* Private */,
+      25,    1,  184,    2, 0x08 /* Private */,
+      27,    1,  187,    2, 0x08 /* Private */,
+      28,    1,  190,    2, 0x08 /* Private */,
+      29,    1,  193,    2, 0x08 /* Private */,
+      30,    1,  196,    2, 0x08 /* Private */,
+      31,    1,  199,    2, 0x08 /* Private */,
+      32,    1,  202,    2, 0x08 /* Private */,
+      33,    0,  205,    2, 0x08 /* Private */,
 
  // signals: parameters
     QMetaType::Void,
@@ -153,14 +155,15 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   23,
-    QMetaType::Void, QMetaType::QString,   25,
-    QMetaType::Void, QMetaType::QString,   25,
-    QMetaType::Void, QMetaType::QString,   25,
-    QMetaType::Void, QMetaType::QString,   25,
-    QMetaType::Void, QMetaType::QString,   25,
-    QMetaType::Void, QMetaType::QString,   25,
-    QMetaType::Void, QMetaType::QString,   25,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   24,
+    QMetaType::Void, QMetaType::QString,   26,
+    QMetaType::Void, QMetaType::QString,   26,
+    QMetaType::Void, QMetaType::QString,   26,
+    QMetaType::Void, QMetaType::QString,   26,
+    QMetaType::Void, QMetaType::QString,   26,
+    QMetaType::Void, QMetaType::QString,   26,
+    QMetaType::Void, QMetaType::QString,   26,
     QMetaType::Void,
 
        0        // eod
@@ -186,20 +189,21 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 11: _t->on_exitButton_clicked(); break;
         case 12: _t->on_streamingImg_clicked(); break;
         case 13: _t->in_camera_focus_distance(); break;
-        case 14: _t->on_img0_clicked(); break;
-        case 15: _t->on_img1_clicked(); break;
-        case 16: _t->on_img2_clicked(); break;
-        case 17: _t->on_img3_clicked(); break;
-        case 18: _t->on_img4_clicked(); break;
-        case 19: _t->on_tabWidget_currentChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 20: _t->on_factorycb_currentTextChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 21: _t->on_ipcb1_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 22: _t->on_ipcb2_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 23: _t->on_ipcb3_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 24: _t->on_ipcb4_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 25: _t->on_portcb_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 26: _t->on_cellinfocb_currentTextChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 27: _t->on_updateButton_clicked(); break;
+        case 14: _t->updateDistance(); break;
+        case 15: _t->on_img0_clicked(); break;
+        case 16: _t->on_img1_clicked(); break;
+        case 17: _t->on_img2_clicked(); break;
+        case 18: _t->on_img3_clicked(); break;
+        case 19: _t->on_img4_clicked(); break;
+        case 20: _t->on_tabWidget_currentChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 21: _t->on_factorycb_currentTextChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 22: _t->on_ipcb1_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 23: _t->on_ipcb2_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 24: _t->on_ipcb3_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 25: _t->on_ipcb4_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 26: _t->on_portcb_currentIndexChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 27: _t->on_cellinfocb_currentTextChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 28: _t->on_updateButton_clicked(); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -247,13 +251,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 28)
+        if (_id < 29)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 28;
+        _id -= 29;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 28)
+        if (_id < 29)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 28;
+        _id -= 29;
     }
     return _id;
 }

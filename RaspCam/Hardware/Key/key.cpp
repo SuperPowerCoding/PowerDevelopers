@@ -8,14 +8,14 @@ Key::Key()
 
 #if KEY_MODULE_ENABLE == 0
     this->_enabled = false;
-    qDebug() << "key disabled";
+    qDebug() << "key module disabled";
     return;
 #endif
     
     this->_enabled = true;
 
     if(wiringPiSetup() == -1){ //when initialize wiring failed,print messageto screen
-            qDebug() << "setup wiringPi failed !! at Key";
+            qDebug() << "setup wiringPi failed!! at Key";
             return ;
     }
 
@@ -30,6 +30,7 @@ Key::Key()
     digitalWrite(LedGreen, HIGH);
     digitalWrite(LedYellow, HIGH);
 #endif
+    qDebug() << "key module enabled";
 }
 
 void Key::setEnable(bool en)

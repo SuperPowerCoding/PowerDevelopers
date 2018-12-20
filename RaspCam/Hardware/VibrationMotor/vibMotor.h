@@ -18,6 +18,7 @@ public:
     ~VibMotor();
 
     void ngVibrate();
+    void okVibrate();
 
 private:
     unsigned int pollingPeriod;

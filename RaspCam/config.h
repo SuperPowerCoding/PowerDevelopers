@@ -1,6 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// debug mode without server
+#define DEBUG_OFF           0
+#define DEBUG_ALWAYS_OK     1
+#define DEBUG_ALWAYS_NG     2
+
+#define DEBUG_MODE      DEBUG_OFF
+
 // Window Size
 #define D_FRAME_WIDTH	    480
 #define D_FRAME_HEIGHT	    320

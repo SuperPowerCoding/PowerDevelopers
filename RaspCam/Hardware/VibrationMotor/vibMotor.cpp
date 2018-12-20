@@ -26,7 +26,7 @@ bool VibMotor::hardwareInit()
     if (wiringPiSetup () == -1) return false;
     
     pinMode (VibMot, OUTPUT);
-    digitalWrite (VibMot, 0);
+    digitalWrite (VibMot, HIGH);
     
     return true;
 }
@@ -41,7 +41,12 @@ void VibMotor::vibrate(int ms, int nTimes)
 
 void VibMotor::ngVibrate()
 {
-    vibrate(250,3);
+    vibrate(100,3);
+}
+
+void VibMotor::okVibrate()
+{
+    vibrate(100,1);
 }
 
 
@@ -63,18 +68,17 @@ void VibMotor::run()
             vibTime.removeAt(0);
         }
         else
-        {
-            
+        {            
             msleep(this->pollingPeriod);            
         }
         mutex.unlock();
 
         while( nTimes > 0)
         {
-            digitalWrite (VibMot, 1);
+            digitalWrite (VibMot, LOW);
             msleep(time);
-            digitalWrite (VibMot, 0);
-            usleep(150000);
+            digitalWrite (VibMot, HIGH);
+            usleep(100000);
             nTimes--;
         }
     }

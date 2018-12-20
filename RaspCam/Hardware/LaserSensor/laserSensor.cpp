@@ -1,4 +1,5 @@
 #include "laserSensor.h"
+#include <unistd.h>
 
 #define VERSION_REQUIRED_MAJOR 1
 #define VERSION_REQUIRED_MINOR 0
@@ -170,6 +171,8 @@ LaserSensor::LaserSensor()
     }
 
     sleepMs = 0;
+    _measure = false;
+    pollingPeriod = LASER_SENSOR_POLLING_PERIOD_MS;
 }
 
 
@@ -253,6 +256,98 @@ void LaserSensor::sleep(int ms)
     sleepMs = ms;
 }
 
+int LaserSensor::getCurDistance()
+{
+    int temp;
+
+    mutex.lock();
+
+    temp = distance;
+
+    mutex.unlock();
+
+    return temp;
+}
+
+void LaserSensor::setCurDistance(int dist)
+{
+    mutex.lock();
+    distance = dist;
+    mutex.unlock();
+}
+
+void LaserSensor::stopMeasure()
+{
+    measureMutex.lock();
+    _measure = false;
+    measureMutex.unlock();
+}
+void LaserSensor::startMeasure()
+{
+    measureMutex.lock();
+    _measure = true;
+    measureMutex.unlock();
+}
+
+
+void LaserSensor::resetDevice()
+{
+
+    VL53L0X_Error Status = VL53L0X_ERROR_NONE;   
+    uint32_t refSpadCount;
+    uint8_t isApertureSpads;
+    uint8_t VhvSettings;
+    uint8_t PhaseCal;
+    
+    close(pMyDevice->fd);
+
+    hardwareInit();
+
+    if(Status == VL53L0X_ERROR_NONE)
+    {
+        printf ("Call of VL53L0X_StaticInit\n");
+        Status = VL53L0X_StaticInit(pMyDevice); // Device Initialization
+        // StaticInit will set interrupt by default
+        print_pal_error(Status);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE)
+    {
+        printf ("Call of VL53L0X_PerformRefCalibration\n");
+        Status = VL53L0X_PerformRefCalibration(pMyDevice,
+        		&VhvSettings, &PhaseCal); // Device Initialization
+        print_pal_error(Status);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE)
+    {
+        printf ("Call of VL53L0X_PerformRefSpadManagement\n");
+        Status = VL53L0X_PerformRefSpadManagement(pMyDevice,
+        		&refSpadCount, &isApertureSpads); // Device Initialization
+        print_pal_error(Status);
+    }
+
+    if(Status == VL53L0X_ERROR_NONE)
+    {
+
+        printf ("Call of VL53L0X_SetDeviceMode\n");
+        Status = VL53L0X_SetDeviceMode(pMyDevice, VL53L0X_DEVICEMODE_CONTINUOUS_RANGING); // Setup in single ranging mode
+        print_pal_error(Status);
+    }
+    
+    if(Status == VL53L0X_ERROR_NONE)
+    {
+		printf ("Call of VL53L0X_StartMeasurement\n");
+		Status = VL53L0X_StartMeasurement(pMyDevice);
+		print_pal_error(Status);
+    }
+}
+
+void LaserSensor::clearInterruptFlag()
+{
+    interruptFlag = false;
+}
+
 void LaserSensor::run()
 {
     VL53L0X_RangingMeasurementData_t    RangingMeasurementData;
@@ -270,9 +365,6 @@ void LaserSensor::run()
         return;
     }
 
-    printf ("i2c fd check : %d\n", pMyDevice->fd);
-
-
     if(Status == VL53L0X_ERROR_NONE)
     {
         printf ("Call of VL53L0X_StaticInit\n");
@@ -280,8 +372,6 @@ void LaserSensor::run()
         // StaticInit will set interrupt by default
         print_pal_error(Status);
     }
-
-    printf("end\n");
 
     if(Status == VL53L0X_ERROR_NONE)
     {
@@ -321,36 +411,51 @@ void LaserSensor::run()
         {
             if(sleepMs)
             {
+                printf("max tryial reached sleep :%d\n", sleepMs);
                 msleep(sleepMs);
                 sleepMs = 0;
             }
 
-            Status = WaitMeasurementDataReady(pMyDevice);
-
-            if(Status == VL53L0X_ERROR_NONE)
+            if(_measure == true)
             {
-                Status = VL53L0X_GetRangingMeasurementData(pMyDevice, pRangingMeasurementData);
-                
-                filteredVal = medianFilter(pRangingMeasurementData->RangeMilliMeter);
+                Status = WaitMeasurementDataReady(pMyDevice);
 
-                // printf("Laser :%d, %d\n",pRangingMeasurementData->RangeMilliMeter, filteredVal);
-
-                if(MIN_DETECT_DISTANCE <= filteredVal && filteredVal <= MAX_DETECT_DISTANCE )
+                if(Status == VL53L0X_ERROR_NONE)
                 {
-                    printf("Laser : detect object (%d)\n",filteredVal);
-                    // wait for stability.
-                    msleep(50);
-                    // call interrupt signal
-                    emit approachingDetected();
-                }
-                // Clear the interrupt
-                VL53L0X_ClearInterruptMask(pMyDevice, VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
-                // VL53L0X_PollingDelay(pMyDevice);
-            } else {
-                // break;
-                printf("An error occuerd :%d\n",Status);
-            }
+                    Status = VL53L0X_GetRangingMeasurementData(pMyDevice, pRangingMeasurementData);
+                    
+                    filteredVal = medianFilter(pRangingMeasurementData->RangeMilliMeter);
 
+                    // printf("Laser :%d, %d\n",pRangingMeasurementData->RangeMilliMeter, filteredVal);
+
+                    if(interruptFlag == false)
+                    {
+                        if(MIN_DETECT_DISTANCE <= filteredVal && filteredVal <= MAX_DETECT_DISTANCE )
+                        {
+                            printf("Laser : detect object (%d)\n",filteredVal);
+                            // wait for stability.
+                            msleep(100);
+                            // call interrupt signal
+                            interruptFlag = true;
+                            emit approachingDetected();
+                        }
+                    }
+                    
+                    setCurDistance(filteredVal);                
+                    emit requestDistanceUpdate();
+
+                    // Clear the interrupt
+                    VL53L0X_ClearInterruptMask(pMyDevice, VL53L0X_REG_SYSTEM_INTERRUPT_GPIO_NEW_SAMPLE_READY);
+                    // VL53L0X_PollingDelay(pMyDevice);
+                } else {
+                    // break;
+                    printf("An error occuerd :%d\n",Status);
+                    print_pal_error(Status);
+                    // VL53L0X_ResetDevice(pMyDevice);
+                    
+                    resetDevice();
+                }
+            }
             // have to add sleep function to operate safely.
             msleep(pollingPeriod);
         }

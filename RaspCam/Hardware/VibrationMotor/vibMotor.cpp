@@ -73,13 +73,18 @@ void VibMotor::run()
         }
         mutex.unlock();
 
-        while( nTimes > 0)
+        if( nTimes > 0 )
         {
-            digitalWrite (VibMot, LOW);
-            msleep(time);
-            digitalWrite (VibMot, HIGH);
-            usleep(100000);
-            nTimes--;
+            while( nTimes > 0)
+            {
+                digitalWrite (VibMot, LOW);
+                msleep(time);
+                digitalWrite (VibMot, HIGH);
+                usleep(100000);
+                nTimes--;
+            }
+
+            emit vibrationFinished();
         }
     }
 }

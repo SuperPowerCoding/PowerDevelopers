@@ -37,7 +37,7 @@ class MainWindow;
 
 
 #define MAX_RETRY_NUM       1
-#define SLEEP_MS_AT_FAILED  2000
+
 
 enum CaptureStatus
 {
@@ -127,6 +127,11 @@ private slots:
 
     void on_updateButton_clicked();
 
+
+    // check output hw finished
+    void on_buzzer_finished();
+    void on_vib_motor_finished();
+
 private:
 
     Ui::MainWindow *ui;
@@ -210,6 +215,12 @@ private:
    bool setCaptureStatus(CaptureStatus status);
    bool canWeCaptureNow();
    
+
+   int outputHWoperating;
+   bool isOutputHWOperating();
+   void outputHWsetOperatingFlag(int flag, bool onOff);
+
+   void checkOutputHWFinished();
 
 signals :
     void updateRawImgFin();

@@ -33,10 +33,10 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = RaspCam1.0.0
-DISTDIR = /home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
+DISTDIR = /home/pi/src/Prj/PowerDevelopers/RaspCam/.tmp/RaspCam1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1
-LIBS          = $(SUBLIBS) -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev -L/usr/lib/arm-linux-gnueabihf -lmysqlclient -L/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam/./ -lVL53L0X_Rasp -lQt5Widgets -lQt5Gui -lQt5Core -lGLESv2 -lpthread 
+LIBS          = $(SUBLIBS) -L/usr/local/lib -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_tracking -lopencv_videoio -lraspicam_cv -lraspicam -lwiringPi -lwiringPiDev -L/usr/lib/arm-linux-gnueabihf -lmysqlclient -L/home/pi/src/Prj/PowerDevelopers/RaspCam/./ -lVL53L0X_Rasp -lQt5Widgets -lQt5Gui -lQt5Core -lGLESv2 -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -200,7 +200,7 @@ TARGET        = RaspCam
 first: all
 ####### Build rules
 
-$(TARGET): /home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam/./libVL53L0X_Rasp.a ui_mainwindow.h $(OBJECTS)  
+$(TARGET): /home/pi/src/Prj/PowerDevelopers/RaspCam/./libVL53L0X_Rasp.a ui_mainwindow.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: RaspCam.pro /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++/qmake.conf /usr/lib/arm-linux-gnueabihf/qt5/mkspecs/features/spec_pre.prf \
@@ -414,29 +414,29 @@ moc_mainwindow.cpp: Camera/camera.h \
 		Hardware/VibrationMotor/vibMotor.h \
 		mainwindow.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
 moc_camera.cpp: config.h \
 		Camera/camera.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Camera/camera.h -o moc_camera.cpp
 
 moc_network.cpp: config.h \
 		Resource/resource.h \
 		Network/network.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Network/network.h -o moc_network.cpp
 
 moc_buzzer.cpp: Hardware/Buzzer/tones.h \
 		Hardware/hardware.h \
 		Hardware/Buzzer/buzzer.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Buzzer/buzzer.h -o moc_buzzer.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Buzzer/buzzer.h -o moc_buzzer.cpp
 
 moc_key.cpp: Hardware/hardware.h \
 		Hardware/Key/key.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Key/key.h -o moc_key.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/Key/key.h -o moc_key.cpp
 
 moc_laserSensor.cpp: Hardware/hardware.h \
 		Hardware/LaserSensor/inc/vl53l0x_api.h \
@@ -448,12 +448,12 @@ moc_laserSensor.cpp: Hardware/hardware.h \
 		Hardware/LaserSensor/inc/vl53l0x_platform_log.h \
 		Hardware/LaserSensor/laserSensor.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/LaserSensor/laserSensor.h -o moc_laserSensor.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/LaserSensor/laserSensor.h -o moc_laserSensor.cpp
 
 moc_vibMotor.cpp: Hardware/hardware.h \
 		Hardware/VibrationMotor/vibMotor.h \
 		/usr/lib/arm-linux-gnueabihf/qt5/bin/moc
-	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/feature/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/VibrationMotor/vibMotor.h -o moc_vibMotor.cpp
+	/usr/lib/arm-linux-gnueabihf/qt5/bin/moc $(DEFINES) -I/usr/lib/arm-linux-gnueabihf/qt5/mkspecs/linux-g++ -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/local/include -I/usr/local/include/c++/6.3.0 -I/usr/include/mysql -I/home/pi/src/Prj/PowerDevelopers/RaspCam -I/usr/include/arm-linux-gnueabihf/qt5 -I/usr/include/arm-linux-gnueabihf/qt5/QtWidgets -I/usr/include/arm-linux-gnueabihf/qt5/QtGui -I/usr/include/arm-linux-gnueabihf/qt5/QtCore -I/usr/include/c++/6 -I/usr/include/arm-linux-gnueabihf/c++/6 -I/usr/include/c++/6/backward -I/usr/lib/gcc/arm-linux-gnueabihf/6/include -I/usr/local/include -I/usr/lib/gcc/arm-linux-gnueabihf/6/include-fixed -I/usr/include/arm-linux-gnueabihf -I/usr/include Hardware/VibrationMotor/vibMotor.h -o moc_vibMotor.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:

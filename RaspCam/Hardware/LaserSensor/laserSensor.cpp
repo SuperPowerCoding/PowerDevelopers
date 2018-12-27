@@ -348,6 +348,40 @@ void LaserSensor::clearInterruptFlag()
     interruptFlag = false;
 }
 
+void LaserSensor::setMinDistance(int dist)
+{
+    minMaxMutex.lock();
+    minDistance = dist;
+    minMaxMutex.unlock();
+}
+void LaserSensor::setMaxDistance(int dist)
+{
+    minMaxMutex.lock();
+    maxDistance = dist;
+    minMaxMutex.unlock();
+}
+
+int LaserSensor::getMinDistance()
+{
+    int temp;
+    minMaxMutex.lock();
+    temp = minDistance;
+    minMaxMutex.unlock();
+
+    return temp;
+}
+
+int LaserSensor::getMaxDistance()
+{
+    int temp;
+    minMaxMutex.lock();
+    temp = maxDistance;
+    minMaxMutex.unlock();
+
+    return temp;
+}
+
+
 void LaserSensor::run()
 {
     VL53L0X_RangingMeasurementData_t    RangingMeasurementData;
@@ -404,6 +438,10 @@ void LaserSensor::run()
 		print_pal_error(Status);
     }
 
+
+    setMinDistance(MIN_DETECT_DISTANCE);
+    setMaxDistance(MAX_DETECT_DISTANCE);
+
     if(Status == VL53L0X_ERROR_NONE)
     {
         
@@ -430,7 +468,7 @@ void LaserSensor::run()
 
                     if(interruptFlag == false)
                     {
-                        if(MIN_DETECT_DISTANCE <= filteredVal && filteredVal <= MAX_DETECT_DISTANCE )
+                        if(getMinDistance() <= filteredVal && filteredVal <= getMaxDistance() )
                         {
                             printf("Laser : detect object (%d)\n",filteredVal);
                             // wait for stability.
@@ -449,6 +487,9 @@ void LaserSensor::run()
                     // VL53L0X_PollingDelay(pMyDevice);
                 } else {
                     // break;
+                    setCurDistance(-1);
+                    emit requestDistanceUpdate();
+                    
                     printf("An error occuerd :%d\n",Status);
                     print_pal_error(Status);
                     // VL53L0X_ResetDevice(pMyDevice);

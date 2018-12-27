@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_Buzzer_t {
-    QByteArrayData data[1];
-    char stringdata0[7];
+    QByteArrayData data[3];
+    char stringdata0[21];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -29,10 +29,12 @@ struct qt_meta_stringdata_Buzzer_t {
     )
 static const qt_meta_stringdata_Buzzer_t qt_meta_stringdata_Buzzer = {
     {
-QT_MOC_LITERAL(0, 0, 6) // "Buzzer"
+QT_MOC_LITERAL(0, 0, 6), // "Buzzer"
+QT_MOC_LITERAL(1, 7, 12), // "buzzFinished"
+QT_MOC_LITERAL(2, 20, 0) // ""
 
     },
-    "Buzzer"
+    "Buzzer\0buzzFinished\0"
 };
 #undef QT_MOC_LITERAL
 
@@ -42,21 +44,42 @@ static const uint qt_meta_data_Buzzer[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       0,    0, // methods
+       1,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       0,       // signalCount
+       1,       // signalCount
+
+ // signals: name, argc, parameters, tag, flags
+       1,    0,   19,    2, 0x06 /* Public */,
+
+ // signals: parameters
+    QMetaType::Void,
 
        0        // eod
 };
 
 void Buzzer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    Q_UNUSED(_o);
-    Q_UNUSED(_id);
-    Q_UNUSED(_c);
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Buzzer *_t = static_cast<Buzzer *>(_o);
+        Q_UNUSED(_t)
+        switch (_id) {
+        case 0: _t->buzzFinished(); break;
+        default: ;
+        }
+    } else if (_c == QMetaObject::IndexOfMethod) {
+        int *result = reinterpret_cast<int *>(_a[0]);
+        void **func = reinterpret_cast<void **>(_a[1]);
+        {
+            typedef void (Buzzer::*_t)();
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&Buzzer::buzzFinished)) {
+                *result = 0;
+                return;
+            }
+        }
+    }
     Q_UNUSED(_a);
 }
 
@@ -84,6 +107,21 @@ int Buzzer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     _id = QThread::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 1)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 1;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 1)
+            *reinterpret_cast<int*>(_a[0]) = -1;
+        _id -= 1;
+    }
     return _id;
+}
+
+// SIGNAL 0
+void Buzzer::buzzFinished()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, Q_NULLPTR);
 }
 QT_END_MOC_NAMESPACE

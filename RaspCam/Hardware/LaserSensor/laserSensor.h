@@ -31,6 +31,12 @@ public:
 
     void clearInterruptFlag();
 
+    void setMinDistance(int dist);
+    void setMaxDistance(int dist);
+
+    int getMinDistance();
+    int getMaxDistance();
+
 private:
     unsigned int pollingPeriod;    
     bool _enabled;
@@ -44,6 +50,9 @@ private:
     bool _measure;
     QMutex measureMutex;
 
+    int minDistance;
+    int maxDistance;
+    QMutex minMaxMutex;
 
     VL53L0X_Dev_t MyDevice;
     VL53L0X_Dev_t *pMyDevice;

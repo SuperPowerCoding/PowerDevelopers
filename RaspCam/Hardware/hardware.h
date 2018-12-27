@@ -94,6 +94,8 @@ typedef enum _RaspCam_Port_Map
 */
 #define LASER_SENSOR_POLLING_PERIOD_MS  10
 
+#define LASER_SENSOR_SLEEP_MS_AT_FAILED  2000
+
 /*********************************************
 *   Vib motor module
 **********************************************/
@@ -106,5 +108,16 @@ typedef enum _RaspCam_Port_Map
     It is just for task sleep to operate safely.
 */
 #define VIB_MOTOR_POLLING_PERIOD_MS 1
+
+
+
+
+
+
+// output HW operating flag
+#define VIB_MOT_OPERATING_FLAG  0x00000001
+#define BUZZER_OPERATING_FLAG  0x00000002
+
+
 
 #endif

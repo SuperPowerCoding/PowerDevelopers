@@ -35,6 +35,10 @@ private:
     void vibrate(int ms, int nTimes);
 
     QMutex mutex;
+
+signals:    
+    void vibrationFinished();
+
 };
 
 #endif

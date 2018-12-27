@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ******************************************/
     /* buzzer init */
     this->buzzerTh = new Buzzer();
+    connect(this->buzzerTh, SIGNAL(buzzFinished()), this, SLOT(on_buzzer_finished()));    
     this->buzzerTh->start();
 
     /* key init */
@@ -66,6 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /* vibmotor init */
     this->vibTh = new VibMotor();
+    connect(this->buzzerTh, SIGNAL(vibrationFinished()), this, SLOT(on_vib_motor_finished()));    
     this->vibTh->start();
 
     /* laser sensor init */
@@ -251,7 +253,7 @@ void MainWindow::updateIPResult()
 #elif DEBUG_MODE == DEBUG_ALWAYS_NG
     this->drawImg(true,0,0,100,false,0);
 #endif
-    this->laserTh->clearInterruptFlag();
+    
     setCaptureStatus(CaptureStatus::NOT_CAPTURED_YET);
 }
 
@@ -329,8 +331,9 @@ void MainWindow::increaseTrialCnt()
     if(distanceSensor_retryCnt >= MAX_RETRY_NUM)
     {
         distanceSensor_retryCnt = 0;
-        if(this->vibTh != NULL) this->vibTh->ngVibrate();  
-        if(this->laserTh != NULL) this->laserTh->sleep(SLEEP_MS_AT_FAILED);
+        this->vibTh->ngVibrate();
+        outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG, true);
+        this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
     }
 
     distMutex.unlock();
@@ -364,6 +367,7 @@ void MainWindow::on_streamingImg_clicked()
         setCaptureStatus(CaptureStatus::CAPTURED_FROM_BUTTON);
 
         this->buzzerTh->playCaptureMelody();
+        outputHWsetOperatingFlag(BUZZER_OPERATING_FLAG, true);
         this->getRawImg();
         this->drawImg(false,0,0,0,true,0);
         
@@ -390,6 +394,7 @@ void MainWindow::in_camera_focus_distance()
         cout<<"in_camera_focus_distance"<<endl;
         
         this->buzzerTh->playCaptureMelody();
+        outputHWsetOperatingFlag(BUZZER_OPERATING_FLAG, true);
         this->getRawImg();
         this->drawImg(false,0,0,0,true,0);
         
@@ -405,22 +410,27 @@ void MainWindow::in_camera_focus_distance()
 void MainWindow::updateDistance()
 {
     int distance = this->laserTh->getCurDistance();
-
     QString rate = "";
+
+    if(distance == -1)
+    {
+        rate.append("error");
+    }
+    else
+    {
+        int upper;
+        int lower;
+
+        upper = distance / 10;
+        lower = distance % 10;
+
+        rate = QString::number(upper);
+        rate.append(".");
+        rate.append(QString::number(lower));
+        rate.append(" cm");
+    }
     
-    int upper;
-    int lower;
-
-    upper = distance / 10;
-    lower = distance % 10;
-
-    rate = QString::number(upper);
-    rate.append(".");
-    rate.append(QString::number(lower));
-    rate.append(" cm");
     this->ui->curDistance->setText(rate);
-
-
 }
 
 void MainWindow::on_externalButton_pressed()
@@ -513,7 +523,9 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
         {
             this->keyTh->setLeds(false, true, false);
             this->buzzerTh->playCaptureResultOKMelody();
-            
+            this->vibTh->okVibrate();
+            outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG|BUZZER_OPERATING_FLAG, true);
+
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(0,255,0), 10);
 
             // update img
@@ -533,20 +545,19 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
 				updateLowerUI(-1);
 			}
 
-            
-            this->vibTh->okVibrate();
-            clearTrialCnt();
-            
-            if(this->laserTh != NULL) this->laserTh->sleep(SLEEP_MS_AT_FAILED);
+            clearTrialCnt();            
+            this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
         }
         else
         {
             this->keyTh->setLeds(true, false, false);
             this->buzzerTh->playWrongMelody();
+            outputHWsetOperatingFlag(BUZZER_OPERATING_FLAG, true);
             
             if(curCapturedStatus != CaptureStatus::CAPTURED_FROM_SENSOR)
             {
-                this->vibTh->ngVibrate();                
+                this->vibTh->ngVibrate();
+                outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG, true);
             }
             else
             {
@@ -814,6 +825,7 @@ void MainWindow::updateCurIdx(int idx)
         {
             s.append("OK");
             this->buzzerTh->playFinMelody();
+            outputHWsetOperatingFlag(BUZZER_OPERATING_FLAG, true);
             this->on_ResetButton_clicked();
         }
 
@@ -893,4 +905,46 @@ void MainWindow::on_updateButton_clicked()
     ui->updateButton->setEnabled(false);
 
     emit updateDbReq();
+}
+
+
+bool MainWindow::isOutputHWOperating()
+{
+    if(outputHWoperating == 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void MainWindow::outputHWsetOperatingFlag(int flag, bool onOff)
+{
+    // bit set
+    if(onOff == true)
+    {
+        outputHWoperating |= (flag);
+    }
+    else    // bit clear
+    {
+        outputHWoperating &= (~flag);
+    }
+}
+
+void MainWindow::checkOutputHWFinished()
+{
+    if(isOutputHWOperating() == false)
+    {
+        this->laserTh->clearInterruptFlag();
+    }
+}
+
+void MainWindow::on_buzzer_finished()
+{
+    outputHWsetOperatingFlag(BUZZER_OPERATING_FLAG, false);
+}
+
+void MainWindow::on_vib_motor_finished()
+{
+    outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG, false);
 }

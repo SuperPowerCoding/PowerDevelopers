@@ -254,6 +254,8 @@ void Buzzer::run()
     int size;
     int tone;
     int beat;
+
+    bool isOperating = false;
 /*
     this->playGetCoinMelody();
     this->playGetCoinMelody();
@@ -289,6 +291,8 @@ void Buzzer::run()
         if(size > 0 )
         {
             this->getNote(&tone,&beat);
+            isOperating = true;
+
             if(tone == REST)
             {
                 softToneWrite(BuzPin, 0);
@@ -304,6 +308,12 @@ void Buzzer::run()
         }
         else
         {
+            if(isOperating == true)
+            {
+                isOperating = false;
+                emit buzzFinished();
+            }
+            
             softToneWrite(BuzPin, 0);
             msleep(this->pollingPeriod);
         }

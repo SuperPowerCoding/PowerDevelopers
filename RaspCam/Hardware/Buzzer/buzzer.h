@@ -81,6 +81,9 @@ private:
 
     void close();
 
+signals:    
+    void buzzFinished();
+
 };
 
 

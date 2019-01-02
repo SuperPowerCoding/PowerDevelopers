@@ -346,6 +346,7 @@ void LaserSensor::resetDevice()
 void LaserSensor::clearInterruptFlag()
 {
     interruptFlag = false;
+    printf("laser interrupt flag cleared\n");
 }
 
 void LaserSensor::setMinDistance(int dist)

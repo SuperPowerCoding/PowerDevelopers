@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /* vibmotor init */
     this->vibTh = new VibMotor();
-    connect(this->buzzerTh, SIGNAL(vibrationFinished()), this, SLOT(on_vib_motor_finished()));    
+    connect(this->vibTh, SIGNAL(vibrationFinished()), this, SLOT(on_vib_motor_finished()));    
     this->vibTh->start();
 
     /* laser sensor init */
@@ -318,9 +318,11 @@ bool MainWindow::canWeCaptureNow()
 void MainWindow::updateResource()
 {
     this->curIdx = -1;
-    this->laserTh->startMeasure();
     this->updateLowerUI(this->curIdx);
     this->resourceFin = true;
+
+    this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
+    this->laserTh->startMeasure();    
 }
 
 void MainWindow::increaseTrialCnt()
@@ -389,7 +391,7 @@ void MainWindow::in_camera_focus_distance()
 {
     if (canWeCaptureNow() == true)
     {
-        setCaptureStatus(CaptureStatus::CAPTURED_FROM_SENSOR);
+        setCaptureStatus(CaptureStatus::CAPTURED_FROM_SENSOR);        
 
         cout<<"in_camera_focus_distance"<<endl;
         
@@ -546,7 +548,7 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
 			}
 
             clearTrialCnt();            
-            this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
+            
         }
         else
         {
@@ -928,6 +930,7 @@ void MainWindow::outputHWsetOperatingFlag(int flag, bool onOff)
     else    // bit clear
     {
         outputHWoperating &= (~flag);
+        checkOutputHWFinished();
     }
 }
 
@@ -935,16 +938,19 @@ void MainWindow::checkOutputHWFinished()
 {
     if(isOutputHWOperating() == false)
     {
+        this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
         this->laserTh->clearInterruptFlag();
     }
 }
 
 void MainWindow::on_buzzer_finished()
 {
+    qDebug() << "buzzer operation finished";
     outputHWsetOperatingFlag(BUZZER_OPERATING_FLAG, false);
 }
 
 void MainWindow::on_vib_motor_finished()
 {
+    qDebug() << "vib motor finished";
     outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG, false);
 }

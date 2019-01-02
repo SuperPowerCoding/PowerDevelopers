@@ -216,7 +216,7 @@ private:
    bool canWeCaptureNow();
    
 
-   int outputHWoperating;
+   unsigned int outputHWoperating = 0;
    bool isOutputHWOperating();
    void outputHWsetOperatingFlag(int flag, bool onOff);
 

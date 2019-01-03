@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <qevent.h>
 
-#include <QTime>
+
 
 /* * * * * * * * * * * * * * * * * * * *
  * include  coustomized header
@@ -244,7 +244,7 @@ void MainWindow::on_exitButton_clicked()
 void MainWindow::updateIPResult()
 {
 	// show result data
-    qDebug() << "result";
+    qDebug() << "update IP result";    
     
 #if DEBUG_MODE == DEBUG_OFF
     this->drawImg(true,this->netTh->ipResult.x,this->netTh->ipResult.y,this->netTh->ipResult.matchRate,this->netTh->ipResult.result, this->netTh->ipResult.err_code);
@@ -311,7 +311,7 @@ bool MainWindow::canWeCaptureNow()
     }
 
     statusMutex.unlock();
-   
+
     return result;
 }
 
@@ -325,20 +325,23 @@ void MainWindow::updateResource()
     this->laserTh->startMeasure();    
 }
 
-void MainWindow::increaseTrialCnt()
+bool MainWindow::increaseTrialCnt()
 {
+    bool overflow = false;
+
     distMutex.lock();
 
     distanceSensor_retryCnt++;
     if(distanceSensor_retryCnt >= MAX_RETRY_NUM)
     {
         distanceSensor_retryCnt = 0;
-        this->vibTh->ngVibrate();
-        outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG, true);
-        this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
+        overflow = true;
     }
 
     distMutex.unlock();
+
+
+    return overflow;
 }
 
 
@@ -366,6 +369,7 @@ void MainWindow::on_streamingImg_clicked()
 
     if (canWeCaptureNow() == true)
     {
+        
         setCaptureStatus(CaptureStatus::CAPTURED_FROM_BUTTON);
 
         this->buzzerTh->playCaptureMelody();
@@ -373,12 +377,13 @@ void MainWindow::on_streamingImg_clicked()
         this->getRawImg();
         this->drawImg(false,0,0,0,true,0);
         
-        this->keyTh->setLeds(false, false, true);
-        
+        this->keyTh->setLeds(false, false, true);        
 
 #if DEBUG_MODE != DEBUG_OFF        
         updateIPResult();
 #endif
+
+
     }
 
     /*
@@ -405,6 +410,8 @@ void MainWindow::in_camera_focus_distance()
 #if DEBUG_MODE != DEBUG_OFF
         updateIPResult();
 #endif
+
+        
     }
 }
 
@@ -563,9 +570,15 @@ void MainWindow::drawImg(bool draw, int x, int y,int matchRate, bool result, uch
             }
             else
             {
-                increaseTrialCnt();
+                // if overflowed
+                if(increaseTrialCnt() == true)
+                {
+                    this->vibTh->ngVibrate();
+                    outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG, true);
+                    this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
+                }
             }
-
+            
             cv::rectangle(img, Point(0,0), Point(img.cols-5, img.rows), Scalar(255,0,0), 10);
         }
 
@@ -671,10 +684,15 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         this->netTh->userSettingFlag = true;
 #endif
         this->keyTh->setLeds(false, true, false);
+        if(resourceFin == true)
+        {
+            this->laserTh->startMeasure();
+        }
 	}
     else
     {
         this->keyTh->setLeds(false, false, false);
+        this->laserTh->stopMeasure();
 	}
 	
 }
@@ -931,6 +949,7 @@ void MainWindow::outputHWsetOperatingFlag(int flag, bool onOff)
     {
         outputHWoperating &= (~flag);
         checkOutputHWFinished();
+        qDebug() << "HW operation flag :" << outputHWoperating;
     }
 }
 
@@ -938,7 +957,7 @@ void MainWindow::checkOutputHWFinished()
 {
     if(isOutputHWOperating() == false)
     {
-        this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
+        // this->laserTh->sleep(LASER_SENSOR_SLEEP_MS_AT_FAILED);
         this->laserTh->clearInterruptFlag();
     }
 }
@@ -951,6 +970,6 @@ void MainWindow::on_buzzer_finished()
 
 void MainWindow::on_vib_motor_finished()
 {
-    qDebug() << "vib motor finished";
+    qDebug() << "vib motor finished";    
     outputHWsetOperatingFlag(VIB_MOT_OPERATING_FLAG, false);
 }

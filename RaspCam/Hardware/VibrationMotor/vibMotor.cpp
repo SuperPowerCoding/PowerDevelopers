@@ -41,12 +41,12 @@ void VibMotor::vibrate(int ms, int nTimes)
 
 void VibMotor::ngVibrate()
 {
-    vibrate(100,3);
+    vibrate(500,2);
 }
 
 void VibMotor::okVibrate()
 {
-    vibrate(100,1);
+    vibrate(500,1);
 }
 
 
@@ -66,12 +66,14 @@ void VibMotor::run()
 
             vibNTimes.removeAt(0);
             vibTime.removeAt(0);
+            mutex.unlock();
         }
         else
         {            
+            mutex.unlock();
             msleep(this->pollingPeriod);            
         }
-        mutex.unlock();
+        
 
         if( nTimes > 0 )
         {
@@ -80,7 +82,8 @@ void VibMotor::run()
                 digitalWrite (VibMot, LOW);
                 msleep(time);
                 digitalWrite (VibMot, HIGH);
-                usleep(100000);
+                //usleep(100000);
+                msleep(100);
                 nTimes--;
             }
 

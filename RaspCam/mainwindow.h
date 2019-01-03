@@ -6,6 +6,7 @@
 #include <QMutex>
 #include <QThread>
 #include <QObject>
+#include <QTime>
 
 // basic module headers
 #include "Camera/camera.h"
@@ -177,7 +178,7 @@ private:
     int distanceSensor_retryCnt;
     QMutex distMutex;
 
-    void increaseTrialCnt();
+    bool increaseTrialCnt();
     int getTrialCnt();
     void clearTrialCnt();
     
@@ -221,6 +222,9 @@ private:
    void outputHWsetOperatingFlag(int flag, bool onOff);
 
    void checkOutputHWFinished();
+
+
+   QTime timeDebug;
 
 signals :
     void updateRawImgFin();

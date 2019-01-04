@@ -11,6 +11,7 @@
 // Min, Max distance
 #define MIN_DETECT_DISTANCE  95
 #define MAX_DETECT_DISTANCE  110
+#define RESUME_DETECT_DISTANCE 200
 
 
 void LaserSensor::insertionSort(uint32_t * arr, uint32_t size)
@@ -346,6 +347,7 @@ void LaserSensor::resetDevice()
 void LaserSensor::clearInterruptFlag()
 {
     interruptFlag = false;
+    farDistanceRecon = true;
     printf("laser interrupt flag cleared\n");
 }
 
@@ -467,7 +469,7 @@ void LaserSensor::run()
 
                     // printf("Laser :%d, %d\n",pRangingMeasurementData->RangeMilliMeter, filteredVal);
 
-                    if(interruptFlag == false)
+                    if(interruptFlag == false && farDistanceRecon == false)
                     {
                         if(getMinDistance() <= filteredVal && filteredVal <= getMaxDistance() )
                         {
@@ -477,6 +479,13 @@ void LaserSensor::run()
                             // call interrupt signal
                             interruptFlag = true;
                             emit approachingDetected();
+                        }
+                    }
+                    else
+                    {
+                        if(RESUME_DETECT_DISTANCE <= filteredVal)
+                        {
+                            farDistanceRecon = false;
                         }
                     }
                     

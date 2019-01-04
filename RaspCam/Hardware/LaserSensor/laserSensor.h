@@ -44,6 +44,7 @@ private:
 
     bool hardwareInit();
     bool interruptFlag;
+    bool farDistanceRecon = false;
 
     int sleepMs;
 
